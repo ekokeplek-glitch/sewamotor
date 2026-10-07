@@ -1,0 +1,712 @@
+From 6afe0721b7733e662b69da21f6dd337563f940da Mon Sep 17 00:00:00 2001
+From: Ryokourent Dev <dev@ryokourent.local>
+Date: Wed, 7 Oct 2026 04:46:14 +0000
+Subject: [PATCH] feat(roles): register ryokourent_operator role with
+ restricted capabilities
+
+---
+ CHANGELOG.md                                  |  15 +
+ SESSION_STATE.md                              |  28 +-
+ TASKS.md                                      |  19 +-
+ .../ryokourent-core/includes/user-roles.php   | 189 +++++++++++
+ .../ryokourent-core/ryokourent-core.php       |  16 +-
+ .../ryokourent-core/tests/test-user-roles.php | 306 ++++++++++++++++++
+ .../plugins/ryokourent-core/uninstall.php     |  26 ++
+ 7 files changed, 580 insertions(+), 19 deletions(-)
+ create mode 100644 wp-content/plugins/ryokourent-core/includes/user-roles.php
+ create mode 100644 wp-content/plugins/ryokourent-core/tests/test-user-roles.php
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index c2dd05a..24d4f1d 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -5,6 +5,21 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
+ 
+ ---
+ 
++## [Unreleased] - 2026-10-07
++
++### Added
++- **Fase 3 (TASK-020: Role Operator Ryokourent):**
++  - Pembuatan modul `wp-content/plugins/ryokourent-core/includes/user-roles.php`:
++    - Role `ryokourent_operator` ("Operator Ryokourent") dengan whitelist capability `read` dan `manage_ryokourent_bookings`; tanpa hak edit tema, plugin, user, atau pengaturan tarif.
++    - Registrasi idempoten yang mencabut capability berlebih, memulihkan capability yang hilang, dan menyelaraskan label role lama.
++    - Sinkronisasi otomatis berbasis versi skema (`ryokourent_roles_version`) pada hook `init`.
++    - Pembersihan deaktivasi aman: role hanya dihapus jika tidak dipakai user.
++  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (belum dieksekusi pada sesi ini).
++
++### Changed
++- `ryokourent-core.php`: activation hook memakai `ryokourent_install_operator_role()` menggantikan `add_role` inline (label diseragamkan menjadi "Operator Ryokourent"); deactivation hook memanggil `ryokourent_deactivate_operator_role()`.
++- `uninstall.php`: menghapus role operator (user dipindah ke `subscriber`), mencabut capability kustom dari administrator, dan menghapus opsi `ryokourent_roles_version`.
++
+ ## [Unreleased] - 2026-10-06
+ 
+ ### Added
+diff --git a/SESSION_STATE.md b/SESSION_STATE.md
+index 6705c54..78ff182 100644
+--- a/SESSION_STATE.md
++++ b/SESSION_STATE.md
+@@ -5,11 +5,12 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+ ---
+ 
+ ## 1. Status Sesi Saat Ini
+-* **Tanggal / Waktu:** 2026-10-06
+-* **Cabang Git Aktif:** `feature/booking-storage` (dibuat dari `develop`)
++* **Tanggal / Waktu:** 2026-10-07
++* **Cabang Git Aktif:** `feature/user-roles` (dibuat dari `develop`)
+ * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
+   - `main` (Branch produksi resmi)
+   - `develop` (Branch integrasi aktif)
++  - `feature/user-roles` (Fitur role Operator Ryokourent & pembersihan role)
+   - `feature/booking-storage` (Fitur penyimpanan transaksi CPT penyewaan & handler nonce)
+   - `feature/cpt-motor` (Fitur CPT & katalog armada motor)
+   - `feature/cpt-booking` (Fitur CPT penyewaan & transaksi sewa)
+@@ -19,8 +20,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
+   - `feature/admin-dashboard` (Fitur dashboard admin & pelaporan operasional)
+ * **Task Terakhir Selesai:** `TASK-019: Buat Penyimpanan Booking (AJAX & Nonce Handler Kompatibel Cache)`
+-* **Status Task Terakhir:** **DONE (SELESAI)**
+-* **Task Selanjutnya:** `TASK-020: Buat Role Operator` (Menunggu perintah selanjutnya dari pengguna)
++* **Task Terakhir Diimplementasikan:** `TASK-020: Buat Role Operator`
++* **Status TASK-020:** **IMPLEMENTED (menunggu eksekusi test)** - ubah ke DONE setelah `tests/test-user-roles.php` PASS 100%.
++* **Task Selanjutnya:** `TASK-021: Buat Capability dan Pembatasan Akses` (Menunggu perintah selanjutnya dari pengguna)
+ 
+ ---
+ 
+@@ -47,7 +49,23 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+ | **TASK-017** | Pencegahan Double Booking Atomik | FASE 3 | **DONE** | TASK-016 | 2026-10-01 |
+ | **TASK-018** | Generator Pesan WhatsApp | FASE 3 | **DONE** | TASK-011, TASK-014 | 2026-10-01 |
+ | **TASK-019** | Penyimpanan Booking (AJAX & Nonce) | FASE 3 | **DONE** | TASK-017, TASK-018 | 2026-10-06 |
+-| **TASK-020** | Buat Role Operator | FASE 3 | **PENDING** | TASK-009 | - |
++| **TASK-020** | Buat Role Operator | FASE 3 | **IMPLEMENTED** (menunggu eksekusi test) | TASK-009 | 2026-10-07 |
++
++---
++
++## 3. Komponen yang Telah Diimplementasikan pada TASK-020
++1. **Modul Role Operator (`wp-content/plugins/ryokourent-core/includes/user-roles.php`):**
++   - Role `ryokourent_operator` berlabel "Operator Ryokourent" dengan whitelist capability mutlak: `read` dan `manage_ryokourent_bookings`. Tidak ada hak edit tema, plugin, user, maupun pengaturan/tarif (`manage_ryokourent_settings` tetap eksklusif administrator).
++   - `ryokourent_register_operator_role()`: idempoten; pada role yang sudah ada mencabut capability di luar whitelist, memulihkan yang hilang, dan menyelaraskan label lama ("Ryokourent Operator").
++   - `ryokourent_install_operator_role()` (aktivasi) dan `ryokourent_maybe_sync_operator_role()` (hook `init`, hanya berjalan saat versi skema role `ryokourent_roles_version` berubah, sehingga tidak menimpa perubahan manual).
++   - `ryokourent_deactivate_operator_role()`: role dihapus hanya bila tidak dipakai user (`absent` / `kept` / `removed`).
++2. **Wiring (`ryokourent-core.php`, `uninstall.php`):**
++   - Activation hook memuat `user-roles.php` secara eksplisit (modul baru dimuat pada `plugins_loaded`) dan menggantikan `add_role` inline sebelumnya.
++   - Deactivation hook memanggil pembersihan aman.
++   - `uninstall.php`: user operator dipindah ke `subscriber` (role lain dipertahankan), role dihapus, capability kustom dicabut dari administrator, opsi `ryokourent_roles_version` dihapus. Pembersihan ini belum mendukung multisite.
++3. **Automated Unit Test Suite:**
++   - `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (pengujian whitelist, registrasi, idempotensi, pencabutan capability berlebih, sinkronisasi label & versi, deaktivasi aman, uninstall, dan wiring berkas utama). **Belum dieksekusi** pada sesi ini (PHP CLI tidak tersedia).
++4. **Di luar lingkup (TASK-021):** pemberian capability ke administrator, pembatasan akses halaman admin (403), dan peninjauan hak edit post `motor` untuk operator.
+ 
+ ---
+ 
+diff --git a/TASKS.md b/TASKS.md
+index 5a4e20f..c974d97 100644
+--- a/TASKS.md
++++ b/TASKS.md
+@@ -287,14 +287,21 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
+ 
+ ---
+ 
+-### TASK-020: Buat Role Operator
+-* **Tujuan:** Mendaftarkan peran user WordPress baru `ryokourent_operator` dengan hak akses terbatas pada menu operasional harian rental motor.
++### TASK-020: Buat Role Operator [IMPLEMENTED - menunggu eksekusi test]
++* **Status:** Diimplementasikan - 2026-10-07. Ubah menjadi **DONE** setelah `php wp-content/plugins/ryokourent-core/tests/test-user-roles.php` dijalankan dan seluruh pengujian PASS (test belum sempat dieksekusi pada sesi ini karena PHP tidak tersedia di lingkungan pengembangan).
++* **Tujuan:** Mendaftarkan peran user WordPress baru `ryokourent_operator` ("Operator Ryokourent") dengan hak akses terbatas pada menu operasional harian rental motor.
+ * **File yang Dibuat/Diubah:**
+-  * `wp-content/plugins/ryokourent-core/includes/user-roles.php`
++  * `wp-content/plugins/ryokourent-core/includes/user-roles.php` (baru)
++  * `wp-content/plugins/ryokourent-core/ryokourent-core.php` (activation & deactivation hook memanggil modul role; `add_role` inline dihapus)
++  * `wp-content/plugins/ryokourent-core/uninstall.php` (pembersihan role & capability)
++  * `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (baru)
+ * **Dependensi:** TASK-009.
+-* **Kriteria Selesai:** Role `Ryokourent Operator` terdaftar resmi dengan kapabilitas `read` dan `manage_ryokourent_bookings`. Role tidak memiliki hak edit tema, plugin, atau pengaturan harga.
+-* **Cara Pengujian:** Buat user dengan role operator dan uji login.
+-* **Risiko:** Role tidak terhapus bersih saat deaktivasi jika tidak di-handle dengan rapi.
++* **Kriteria Selesai:** Role `Operator Ryokourent` terdaftar resmi dengan kapabilitas `read` dan `manage_ryokourent_bookings` (whitelist mutlak). Role tidak memiliki hak edit tema, plugin, user, atau pengaturan harga (`manage_ryokourent_settings` tetap eksklusif administrator). Registrasi idempoten dan mencabut capability berlebih pada role lama. Deaktivasi tidak menghapus role yang masih dipakai user; uninstall memindahkan user ke `subscriber` lalu menghapus role dan capability kustom.
++* **Cara Pengujian:**
++  1. Jalankan `php wp-content/plugins/ryokourent-core/tests/test-user-roles.php`.
++  2. Manual: aktifkan plugin, buat user dengan role "Operator Ryokourent", login, dan pastikan menu Tema/Plugin/Pengguna/Pengaturan tidak muncul.
++  3. Manual: nonaktifkan plugin saat ada user operator, pastikan role tetap ada; nonaktifkan saat tidak ada user operator, pastikan role hilang dari dropdown role.
++* **Risiko:** Role tidak terhapus bersih saat deaktivasi jika masih dipakai user (disengaja; dibersihkan penuh saat uninstall). Operator belum bisa mengedit post `motor` (hanya `read` + `manage_ryokourent_bookings`); kebutuhan ini dikaji ulang pada TASK-021. Pembatasan akses halaman admin (403) belum termasuk di task ini.
+ 
+ ---
+ 
+diff --git a/wp-content/plugins/ryokourent-core/includes/user-roles.php b/wp-content/plugins/ryokourent-core/includes/user-roles.php
+new file mode 100644
+index 0000000..48c780c
+--- /dev/null
++++ b/wp-content/plugins/ryokourent-core/includes/user-roles.php
+@@ -0,0 +1,189 @@
++<?php
++/**
++ * User Roles: Operator Ryokourent (TASK-020)
++ *
++ * Mendaftarkan role `ryokourent_operator` dengan hak akses operasional minimal.
++ * Role ini sengaja TIDAK memiliki hak untuk mengedit tema, plugin, user,
++ * maupun pengaturan/tarif (`manage_ryokourent_settings` hanya milik administrator).
++ *
++ * Siklus hidup:
++ * - Aktivasi plugin   : ryokourent_install_operator_role()  (idempoten, menyelaraskan role lama).
++ * - Muat ulang (init) : ryokourent_maybe_sync_operator_role() (sekali per versi skema role).
++ * - Deaktivasi plugin : ryokourent_deactivate_operator_role() (role dihapus hanya jika tidak dipakai user).
++ * - Uninstall plugin  : ditangani di uninstall.php (user dipindah ke subscriber, role & cap dibersihkan).
++ *
++ * Pemberian capability ke administrator dan pembatasan akses halaman admin
++ * ditangani pada TASK-021 (di luar lingkup file ini).
++ *
++ * @package Ryokourent_Core
++ * @since   1.0.0
++ */
++
++// Exit if accessed directly.
++if (!defined('ABSPATH')) {
++    exit;
++}
++
++/**
++ * Slug role operator.
++ *
++ * @return string
++ */
++function ryokourent_get_operator_role_slug() {
++    return 'ryokourent_operator';
++}
++
++/**
++ * Versi skema role. Naikkan nilainya jika daftar capability operator berubah
++ * agar instalasi yang sudah berjalan menyelaraskan dirinya secara otomatis.
++ *
++ * @return string
++ */
++function ryokourent_get_roles_version() {
++    return '1';
++}
++
++/**
++ * Daftar capability yang BOLEH dimiliki operator (whitelist mutlak).
++ * Capability lain di role ini dianggap tidak sah dan akan dicabut saat sinkronisasi.
++ *
++ * @return array<string,bool>
++ */
++function ryokourent_get_operator_capabilities() {
++    return array(
++        'read'                       => true,
++        'manage_ryokourent_bookings' => true,
++    );
++}
++
++/**
++ * Menyelaraskan label tampilan role pada data role WordPress.
++ * add_role() tidak memperbarui label role yang sudah ada, sehingga dilakukan manual.
++ *
++ * @param string $label Label baru.
++ * @return bool True jika label diperbarui.
++ */
++function ryokourent_sync_operator_role_label($label) {
++    if (!function_exists('wp_roles')) {
++        return false;
++    }
++
++    $slug     = ryokourent_get_operator_role_slug();
++    $wp_roles = wp_roles();
++
++    if (!isset($wp_roles->roles[$slug]) || $wp_roles->roles[$slug]['name'] === $label) {
++        return false;
++    }
++
++    $wp_roles->roles[$slug]['name'] = $label;
++    $wp_roles->role_names[$slug]    = $label;
++    update_option($wp_roles->role_key, $wp_roles->roles);
++
++    return true;
++}
++
++/**
++ * Mendaftarkan role operator. Aman dipanggil berulang (idempoten):
++ * - Role belum ada     : dibuat dengan capability whitelist.
++ * - Role sudah ada     : capability di luar whitelist dicabut, yang kurang dipulihkan.
++ *
++ * @return bool True jika role tersedia dan sesuai whitelist setelah pemanggilan.
++ */
++function ryokourent_register_operator_role() {
++    if (!function_exists('get_role') || !function_exists('add_role')) {
++        return false;
++    }
++
++    $slug    = ryokourent_get_operator_role_slug();
++    $allowed = ryokourent_get_operator_capabilities();
++    $label   = __('Operator Ryokourent', 'ryokourent');
++    $role    = get_role($slug);
++
++    if (!$role) {
++        $role = add_role($slug, $label, $allowed);
++        return is_object($role);
++    }
++
++    // Cabut capability yang tidak ada di whitelist (mencegah eskalasi privilege).
++    foreach (array_keys($role->capabilities) as $cap) {
++        if (!isset($allowed[$cap])) {
++            $role->remove_cap($cap);
++        }
++    }
++
++    // Pulihkan capability whitelist yang hilang.
++    foreach ($allowed as $cap => $grant) {
++        if (empty($role->capabilities[$cap])) {
++            $role->add_cap($cap, $grant);
++        }
++    }
++
++    ryokourent_sync_operator_role_label($label);
++
++    return true;
++}
++
++/**
++ * Mendaftarkan role lalu menandai versi skema role pada database.
++ * Dipakai oleh activation hook dan sinkronisasi otomatis.
++ *
++ * @return bool
++ */
++function ryokourent_install_operator_role() {
++    $ok = ryokourent_register_operator_role();
++
++    if ($ok) {
++        update_option('ryokourent_roles_version', ryokourent_get_roles_version());
++    }
++
++    return $ok;
++}
++
++/**
++ * Sinkronisasi otomatis role ketika versi skema berubah (mis. plugin diperbarui
++ * lewat penyalinan berkas tanpa aktivasi ulang). Tidak menimpa perubahan manual
++ * pada role selama versi skema sama.
++ *
++ * @return void
++ */
++function ryokourent_maybe_sync_operator_role() {
++    if (get_option('ryokourent_roles_version') === ryokourent_get_roles_version()) {
++        return;
++    }
++
++    ryokourent_install_operator_role();
++}
++add_action('init', 'ryokourent_maybe_sync_operator_role', 5);
++
++/**
++ * Pembersihan saat deaktivasi plugin.
++ *
++ * Role dihapus hanya jika tidak ada user yang memakainya, supaya akun operator
++ * yang sudah ada tidak kehilangan role secara diam-diam. Penghapusan penuh
++ * dilakukan pada uninstall.php.
++ *
++ * @return string 'absent' (role tidak ada) | 'kept' (masih dipakai user) | 'removed'.
++ */
++function ryokourent_deactivate_operator_role() {
++    $slug   = ryokourent_get_operator_role_slug();
++    $status = 'absent';
++
++    if (get_role($slug)) {
++        $users = get_users(array(
++            'role'   => $slug,
++            'number' => 1,
++            'fields' => 'ID',
++        ));
++
++        if (empty($users)) {
++            remove_role($slug);
++            $status = 'removed';
++        } else {
++            $status = 'kept';
++        }
++    }
++
++    delete_option('ryokourent_roles_version');
++
++    return $status;
++}
+diff --git a/wp-content/plugins/ryokourent-core/ryokourent-core.php b/wp-content/plugins/ryokourent-core/ryokourent-core.php
+index 2951c3d..d8a3342 100644
+--- a/wp-content/plugins/ryokourent-core/ryokourent-core.php
++++ b/wp-content/plugins/ryokourent-core/ryokourent-core.php
+@@ -72,13 +72,9 @@ function ryokourent_activate_plugin() {
+         ryokourent_register_cpt_motor();
+     }
+ 
+-    // Register operator role.
+-    if (function_exists('add_role')) {
+-        add_role('ryokourent_operator', __('Ryokourent Operator', 'ryokourent'), array(
+-            'read'                       => true,
+-            'manage_ryokourent_bookings' => true,
+-        ));
+-    }
++    // Register operator role (TASK-020). Module belum dimuat pada saat aktivasi.
++    require_once RYOKOURENT_PLUGIN_DIR . 'includes/user-roles.php';
++    ryokourent_install_operator_role();
+ 
+     // Grant custom capabilities to administrator role.
+     if (function_exists('get_role')) {
+@@ -110,9 +106,13 @@ add_action('admin_init', 'ryokourent_ensure_admin_capabilities');
+ 
+ /**
+  * Deactivation hook callback.
+- * Flushes rewrite rules cleanly.
++ * Cleans up the operator role safely and flushes rewrite rules.
+  */
+ function ryokourent_deactivate_plugin() {
++    // Hapus role operator hanya jika tidak dipakai user manapun (TASK-020).
++    require_once RYOKOURENT_PLUGIN_DIR . 'includes/user-roles.php';
++    ryokourent_deactivate_operator_role();
++
+     flush_rewrite_rules();
+ }
+ register_deactivation_hook(__FILE__, 'ryokourent_deactivate_plugin');
+diff --git a/wp-content/plugins/ryokourent-core/tests/test-user-roles.php b/wp-content/plugins/ryokourent-core/tests/test-user-roles.php
+new file mode 100644
+index 0000000..bae01c5
+--- /dev/null
++++ b/wp-content/plugins/ryokourent-core/tests/test-user-roles.php
+@@ -0,0 +1,306 @@
++<?php
++/**
++ * Test Suite for Operator Role Registration (TASK-020)
++ *
++ * Verifies:
++ * - Role `ryokourent_operator` registered with label "Operator Ryokourent".
++ * - Capability whitelist exactly: read + manage_ryokourent_bookings.
++ * - No theme/plugin/user/settings capabilities granted.
++ * - Idempotent registration, stray capability removal, missing capability restore, label sync.
++ * - Version-gated auto sync on init.
++ * - Safe deactivation (role kept while in use) and full uninstall cleanup.
++ * - Main plugin file wiring (activation/deactivation hooks).
++ *
++ * Run: php wp-content/plugins/ryokourent-core/tests/test-user-roles.php
++ *
++ * @package Ryokourent_Core
++ * @since   1.0.0
++ */
++
++// Define ABSPATH and plugin constants for mock environment.
++if (!defined('ABSPATH')) {
++    define('ABSPATH', __DIR__ . '/../../../../');
++}
++if (!defined('RYOKOURENT_PLUGIN_DIR')) {
++    define('RYOKOURENT_PLUGIN_DIR', dirname(__DIR__) . '/');
++}
++
++// Global mocks.
++$GLOBALS['mock_roles']        = array();
++$GLOBALS['mock_users']        = array();
++$GLOBALS['mock_options']      = array();
++$GLOBALS['mock_actions']      = array();
++$GLOBALS['mock_transients']   = array('ryokourent_dashboard_stats' => 'cached');
++$GLOBALS['mock_wp_roles']     = (object) array(
++    'roles'      => array(),
++    'role_names' => array(),
++    'role_key'   => 'wp_user_roles',
++);
++
++// Mock WordPress classes.
++if (!class_exists('WP_Role')) {
++    class WP_Role {
++        public $name;
++        public $capabilities;
++        public function __construct($name, $capabilities) {
++            $this->name         = $name;
++            $this->capabilities = $capabilities;
++        }
++        public function add_cap($cap, $grant = true) {
++            $this->capabilities[$cap] = $grant;
++        }
++        public function remove_cap($cap) {
++            unset($this->capabilities[$cap]);
++        }
++        public function has_cap($cap) {
++            return !empty($this->capabilities[$cap]);
++        }
++    }
++}
++if (!class_exists('WP_User')) {
++    class WP_User {
++        public $ID;
++        public $roles;
++        public function __construct($id, $roles) {
++            $this->ID    = $id;
++            $this->roles = $roles;
++        }
++        public function remove_role($role) {
++            $this->roles = array_values(array_diff($this->roles, array($role)));
++        }
++        public function add_role($role) {
++            if (!in_array($role, $this->roles, true)) {
++                $this->roles[] = $role;
++            }
++        }
++    }
++}
++
++// Mock WordPress functions.
++if (!function_exists('__')) {
++    function __($text, $domain = 'default') {
++        return $text;
++    }
++}
++if (!function_exists('add_action')) {
++    function add_action($tag, $callback, $priority = 10, $accepted_args = 1) {
++        $GLOBALS['mock_actions'][] = array($tag, $callback, $priority);
++    }
++}
++if (!function_exists('get_option')) {
++    function get_option($name, $default = false) {
++        return array_key_exists($name, $GLOBALS['mock_options']) ? $GLOBALS['mock_options'][$name] : $default;
++    }
++}
++if (!function_exists('update_option')) {
++    function update_option($name, $value) {
++        $GLOBALS['mock_options'][$name] = $value;
++        return true;
++    }
++}
++if (!function_exists('delete_option')) {
++    function delete_option($name) {
++        unset($GLOBALS['mock_options'][$name]);
++        return true;
++    }
++}
++if (!function_exists('delete_transient')) {
++    function delete_transient($name) {
++        unset($GLOBALS['mock_transients'][$name]);
++        return true;
++    }
++}
++if (!function_exists('wp_roles')) {
++    function wp_roles() {
++        return $GLOBALS['mock_wp_roles'];
++    }
++}
++if (!function_exists('get_role')) {
++    function get_role($role) {
++        return isset($GLOBALS['mock_roles'][$role]) ? $GLOBALS['mock_roles'][$role] : null;
++    }
++}
++if (!function_exists('add_role')) {
++    function add_role($role, $display_name, $capabilities = array()) {
++        if (isset($GLOBALS['mock_roles'][$role])) {
++            return null; // Perilaku WordPress: role sudah ada -> null.
++        }
++        $obj                           = new WP_Role($role, $capabilities);
++        $GLOBALS['mock_roles'][$role]  = $obj;
++        $store                         = $GLOBALS['mock_wp_roles'];
++        $store->roles[$role]           = array('name' => $display_name, 'capabilities' => $capabilities);
++        $store->role_names[$role]      = $display_name;
++        return $obj;
++    }
++}
++if (!function_exists('remove_role')) {
++    function remove_role($role) {
++        unset($GLOBALS['mock_roles'][$role]);
++        unset($GLOBALS['mock_wp_roles']->roles[$role]);
++        unset($GLOBALS['mock_wp_roles']->role_names[$role]);
++    }
++}
++if (!function_exists('get_users')) {
++    function get_users($args = array()) {
++        $out = array();
++        foreach ($GLOBALS['mock_users'] as $user) {
++            if (isset($args['role']) && !in_array($args['role'], $user->roles, true)) {
++                continue;
++            }
++            $out[] = (isset($args['fields']) && 'ID' === $args['fields']) ? $user->ID : $user;
++            if (isset($args['number']) && count($out) >= $args['number']) {
++                break;
++            }
++        }
++        return $out;
++    }
++}
++
++// Load module under test.
++require_once RYOKOURENT_PLUGIN_DIR . 'includes/user-roles.php';
++
++// Test runner.
++$test_count = 0;
++$pass_count = 0;
++
++function run_test($description, $assertion) {
++    global $test_count, $pass_count;
++    $test_count++;
++    if ($assertion) {
++        $pass_count++;
++        echo "[PASS] " . $description . PHP_EOL;
++    } else {
++        echo "[FAIL] " . $description . PHP_EOL;
++    }
++}
++
++echo "=== Menjalankan Unit Test Role Operator (TASK-020) ===" . PHP_EOL . PHP_EOL;
++
++$slug = ryokourent_get_operator_role_slug();
++
++// 1. Konstanta & whitelist capability.
++run_test("Slug role operator adalah ryokourent_operator", 'ryokourent_operator' === $slug);
++
++$allowed = ryokourent_get_operator_capabilities();
++run_test("Whitelist capability persis read + manage_ryokourent_bookings", array_keys($allowed) === array('read', 'manage_ryokourent_bookings'));
++
++$forbidden = array(
++    'manage_ryokourent_settings', 'manage_options', 'edit_theme_options', 'edit_themes', 'install_themes',
++    'switch_themes', 'update_themes', 'delete_themes', 'edit_plugins', 'install_plugins', 'activate_plugins',
++    'update_plugins', 'delete_plugins', 'create_users', 'edit_users', 'delete_users', 'list_users',
++    'promote_users', 'remove_users', 'update_core', 'unfiltered_html',
++);
++$leak = array_intersect($forbidden, array_keys($allowed));
++run_test("Whitelist tidak memuat capability tema/plugin/user/pengaturan", empty($leak));
++
++// 2. Registrasi awal.
++run_test("Role belum ada sebelum registrasi", null === get_role($slug));
++run_test("ryokourent_register_operator_role() mengembalikan true", true === ryokourent_register_operator_role());
++
++$role = get_role($slug);
++run_test("Role ryokourent_operator terdaftar", is_object($role));
++run_test("Label role adalah 'Operator Ryokourent'", 'Operator Ryokourent' === $GLOBALS['mock_wp_roles']->roles[$slug]['name']);
++run_test("Role memiliki capability read", $role->has_cap('read'));
++run_test("Role memiliki capability manage_ryokourent_bookings", $role->has_cap('manage_ryokourent_bookings'));
++run_test("Role hanya memiliki 2 capability", 2 === count($role->capabilities));
++
++$has_forbidden = false;
++foreach ($forbidden as $cap) {
++    if ($role->has_cap($cap)) {
++        $has_forbidden = true;
++    }
++}
++run_test("Role tidak memiliki satupun capability terlarang", !$has_forbidden);
++
++// 3. Idempoten.
++$before = $role->capabilities;
++ryokourent_register_operator_role();
++ryokourent_register_operator_role();
++run_test("Registrasi berulang tidak mengubah capability (idempoten)", get_role($slug)->capabilities === $before);
++run_test("Registrasi berulang tidak menggandakan role", 1 === count($GLOBALS['mock_roles']));
++
++// 4. Sinkronisasi role yang sudah 'kotor'.
++$role->add_cap('manage_options');
++$role->add_cap('edit_themes');
++$role->remove_cap('manage_ryokourent_bookings');
++ryokourent_register_operator_role();
++$role = get_role($slug);
++run_test("Capability berlebih (manage_options, edit_themes) dicabut saat sinkronisasi", !$role->has_cap('manage_options') && !$role->has_cap('edit_themes'));
++run_test("Capability whitelist yang hilang dipulihkan", $role->has_cap('manage_ryokourent_bookings') && $role->has_cap('read'));
++
++// 5. Sinkronisasi label role lama.
++$GLOBALS['mock_wp_roles']->roles[$slug]['name'] = 'Ryokourent Operator';
++$GLOBALS['mock_wp_roles']->role_names[$slug]    = 'Ryokourent Operator';
++ryokourent_register_operator_role();
++run_test("Label role lama diselaraskan menjadi 'Operator Ryokourent'", 'Operator Ryokourent' === $GLOBALS['mock_wp_roles']->roles[$slug]['name']);
++run_test("Perubahan label dipersist lewat update_option(role_key)", isset($GLOBALS['mock_options']['wp_user_roles'][$slug]) && 'Operator Ryokourent' === $GLOBALS['mock_options']['wp_user_roles'][$slug]['name']);
++
++// 6. Install + sinkronisasi berbasis versi.
++remove_role($slug);
++$GLOBALS['mock_options'] = array();
++run_test("ryokourent_install_operator_role() berhasil", true === ryokourent_install_operator_role());
++run_test("Install menyimpan versi skema role", ryokourent_get_roles_version() === get_option('ryokourent_roles_version'));
++
++$registered = false;
++foreach ($GLOBALS['mock_actions'] as $action) {
++    if ('init' === $action[0] && 'ryokourent_maybe_sync_operator_role' === $action[1]) {
++        $registered = true;
++    }
++}
++run_test("Sinkronisasi otomatis terpasang pada hook init", $registered);
++
++remove_role($slug);
++ryokourent_maybe_sync_operator_role();
++run_test("Sinkronisasi dilewati jika versi skema sama (tidak menimpa perubahan manual)", null === get_role($slug));
++
++delete_option('ryokourent_roles_version');
++ryokourent_maybe_sync_operator_role();
++run_test("Sinkronisasi berjalan jika versi skema belum tercatat", is_object(get_role($slug)) && ryokourent_get_roles_version() === get_option('ryokourent_roles_version'));
++
++// 7. Deaktivasi aman.
++$GLOBALS['mock_users'] = array(new WP_User(5, array($slug)));
++run_test("Deaktivasi mengembalikan 'kept' saat role masih dipakai user", 'kept' === ryokourent_deactivate_operator_role());
++run_test("Role tetap ada saat masih dipakai user", is_object(get_role($slug)));
++run_test("Deaktivasi menghapus penanda versi skema", false === get_option('ryokourent_roles_version'));
++
++$GLOBALS['mock_users'] = array();
++run_test("Deaktivasi mengembalikan 'removed' saat tidak ada user", 'removed' === ryokourent_deactivate_operator_role());
++run_test("Role terhapus bersih saat tidak ada user", null === get_role($slug));
++run_test("Deaktivasi saat role tidak ada mengembalikan 'absent' tanpa error", 'absent' === ryokourent_deactivate_operator_role());
++
++// 8. Uninstall (menjalankan uninstall.php apa adanya).
++ryokourent_install_operator_role();
++$GLOBALS['mock_roles']['administrator'] = new WP_Role('administrator', array(
++    'manage_options'             => true,
++    'manage_ryokourent_bookings' => true,
++    'manage_ryokourent_settings' => true,
++));
++$user_only  = new WP_User(10, array($slug));
++$user_multi = new WP_User(11, array($slug, 'editor'));
++$user_other = new WP_User(12, array('subscriber'));
++$GLOBALS['mock_users'] = array($user_only, $user_multi, $user_other);
++
++if (!defined('WP_UNINSTALL_PLUGIN')) {
++    define('WP_UNINSTALL_PLUGIN', 'ryokourent-core/ryokourent-core.php');
++}
++include RYOKOURENT_PLUGIN_DIR . 'uninstall.php';
++
++run_test("Uninstall menghapus role ryokourent_operator", null === get_role($slug));
++run_test("Uninstall memindahkan user operator-saja ke subscriber", array('subscriber') === $user_only->roles);
++run_test("Uninstall mempertahankan role lain milik user (editor)", array('editor') === $user_multi->roles);
++run_test("Uninstall tidak menyentuh user non-operator", array('subscriber') === $user_other->roles);
++run_test("Uninstall mencabut capability kustom dari administrator", !$GLOBALS['mock_roles']['administrator']->has_cap('manage_ryokourent_bookings') && !$GLOBALS['mock_roles']['administrator']->has_cap('manage_ryokourent_settings'));
++run_test("Uninstall tidak mencabut capability bawaan administrator", $GLOBALS['mock_roles']['administrator']->has_cap('manage_options'));
++run_test("Uninstall menghapus penanda versi skema role", false === get_option('ryokourent_roles_version'));
++run_test("Uninstall tetap membersihkan transient dashboard", !isset($GLOBALS['mock_transients']['ryokourent_dashboard_stats']));
++
++// 9. Wiring berkas utama plugin.
++$main = file_get_contents(RYOKOURENT_PLUGIN_DIR . 'ryokourent-core.php');
++run_test("Activation hook memanggil ryokourent_install_operator_role()", false !== strpos($main, 'ryokourent_install_operator_role()'));
++run_test("Deactivation hook memanggil ryokourent_deactivate_operator_role()", false !== strpos($main, 'ryokourent_deactivate_operator_role()'));
++run_test("Tidak ada lagi add_role operator inline di berkas utama", false === strpos($main, "add_role('ryokourent_operator'"));
++run_test("Modul user-roles.php terdaftar di loader plugins_loaded", false !== strpos($main, "'includes/user-roles.php'"));
++
++echo PHP_EOL . "Hasil: {$pass_count}/{$test_count} pengujian berhasil." . PHP_EOL;
++
++exit($pass_count === $test_count ? 0 : 1);
+diff --git a/wp-content/plugins/ryokourent-core/uninstall.php b/wp-content/plugins/ryokourent-core/uninstall.php
+index addaa08..4183f4f 100644
+--- a/wp-content/plugins/ryokourent-core/uninstall.php
++++ b/wp-content/plugins/ryokourent-core/uninstall.php
+@@ -13,3 +13,29 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
+ // Clean up temporary options or transients if necessary.
+ // We preserve CPT motor and penyewaan posts by default to avoid accidental business data loss.
+ delete_transient('ryokourent_dashboard_stats');
++
++// -----------------------------------------------------------------------------
++// Operator role cleanup (TASK-020).
++// Plugin tidak dimuat saat uninstall, sehingga logika ditulis mandiri di sini.
++// -----------------------------------------------------------------------------
++$ryokourent_role_slug = 'ryokourent_operator';
++
++// Pindahkan user yang masih memegang role operator agar tidak menjadi user tanpa role.
++$ryokourent_operator_users = get_users(array('role' => $ryokourent_role_slug));
++foreach ($ryokourent_operator_users as $ryokourent_user) {
++    $ryokourent_user->remove_role($ryokourent_role_slug);
++    if (empty($ryokourent_user->roles)) {
++        $ryokourent_user->add_role('subscriber');
++    }
++}
++
++remove_role($ryokourent_role_slug);
++
++// Cabut capability kustom plugin dari administrator.
++$ryokourent_admin_role = get_role('administrator');
++if ($ryokourent_admin_role) {
++    $ryokourent_admin_role->remove_cap('manage_ryokourent_bookings');
++    $ryokourent_admin_role->remove_cap('manage_ryokourent_settings');
++}
++
++delete_option('ryokourent_roles_version');
+-- 
+2.43.0
+

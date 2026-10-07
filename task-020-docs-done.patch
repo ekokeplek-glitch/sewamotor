@@ -1,0 +1,76 @@
+From eb82fdc99ca604ecc55f7a17d5eab6e7aff95efb Mon Sep 17 00:00:00 2001
+From: Ryokourent Dev <dev@ryokourent.local>
+Date: Wed, 7 Oct 2026 05:49:55 +0000
+Subject: [PATCH] docs(roles): mark TASK-020 as done after 40/40 passing tests
+
+---
+ CHANGELOG.md     | 2 +-
+ SESSION_STATE.md | 9 ++++-----
+ TASKS.md         | 4 ++--
+ 3 files changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 24d4f1d..eedf693 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -14,7 +14,7 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
+     - Registrasi idempoten yang mencabut capability berlebih, memulihkan capability yang hilang, dan menyelaraskan label role lama.
+     - Sinkronisasi otomatis berbasis versi skema (`ryokourent_roles_version`) pada hook `init`.
+     - Pembersihan deaktivasi aman: role hanya dihapus jika tidak dipakai user.
+-  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (belum dieksekusi pada sesi ini).
++  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (40 pengujian, seluruhnya PASS).
+ 
+ ### Changed
+ - `ryokourent-core.php`: activation hook memakai `ryokourent_install_operator_role()` menggantikan `add_role` inline (label diseragamkan menjadi "Operator Ryokourent"); deactivation hook memanggil `ryokourent_deactivate_operator_role()`.
+diff --git a/SESSION_STATE.md b/SESSION_STATE.md
+index 78ff182..5626f44 100644
+--- a/SESSION_STATE.md
++++ b/SESSION_STATE.md
+@@ -19,9 +19,8 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
+   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
+   - `feature/admin-dashboard` (Fitur dashboard admin & pelaporan operasional)
+-* **Task Terakhir Selesai:** `TASK-019: Buat Penyimpanan Booking (AJAX & Nonce Handler Kompatibel Cache)`
+-* **Task Terakhir Diimplementasikan:** `TASK-020: Buat Role Operator`
+-* **Status TASK-020:** **IMPLEMENTED (menunggu eksekusi test)** - ubah ke DONE setelah `tests/test-user-roles.php` PASS 100%.
++* **Task Terakhir Selesai:** `TASK-020: Buat Role Operator`
++* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-user-roles.php` 40/40 PASS (XAMPP, 2026-10-07).
+ * **Task Selanjutnya:** `TASK-021: Buat Capability dan Pembatasan Akses` (Menunggu perintah selanjutnya dari pengguna)
+ 
+ ---
+@@ -49,7 +48,7 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+ | **TASK-017** | Pencegahan Double Booking Atomik | FASE 3 | **DONE** | TASK-016 | 2026-10-01 |
+ | **TASK-018** | Generator Pesan WhatsApp | FASE 3 | **DONE** | TASK-011, TASK-014 | 2026-10-01 |
+ | **TASK-019** | Penyimpanan Booking (AJAX & Nonce) | FASE 3 | **DONE** | TASK-017, TASK-018 | 2026-10-06 |
+-| **TASK-020** | Buat Role Operator | FASE 3 | **IMPLEMENTED** (menunggu eksekusi test) | TASK-009 | 2026-10-07 |
++| **TASK-020** | Buat Role Operator | FASE 3 | **DONE** | TASK-009 | 2026-10-07 |
+ 
+ ---
+ 
+@@ -64,7 +63,7 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
+    - Deactivation hook memanggil pembersihan aman.
+    - `uninstall.php`: user operator dipindah ke `subscriber` (role lain dipertahankan), role dihapus, capability kustom dicabut dari administrator, opsi `ryokourent_roles_version` dihapus. Pembersihan ini belum mendukung multisite.
+ 3. **Automated Unit Test Suite:**
+-   - `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (pengujian whitelist, registrasi, idempotensi, pencabutan capability berlebih, sinkronisasi label & versi, deaktivasi aman, uninstall, dan wiring berkas utama). **Belum dieksekusi** pada sesi ini (PHP CLI tidak tersedia).
++   - `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (40 pengujian: whitelist, registrasi, idempotensi, pencabutan capability berlebih, sinkronisasi label & versi, deaktivasi aman, uninstall, dan wiring berkas utama). Dieksekusi di PHP lokal: 40/40 PASS.
+ 4. **Di luar lingkup (TASK-021):** pemberian capability ke administrator, pembatasan akses halaman admin (403), dan peninjauan hak edit post `motor` untuk operator.
+ 
+ ---
+diff --git a/TASKS.md b/TASKS.md
+index c974d97..e8f7cf5 100644
+--- a/TASKS.md
++++ b/TASKS.md
+@@ -287,8 +287,8 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
+ 
+ ---
+ 
+-### TASK-020: Buat Role Operator [IMPLEMENTED - menunggu eksekusi test]
+-* **Status:** Diimplementasikan - 2026-10-07. Ubah menjadi **DONE** setelah `php wp-content/plugins/ryokourent-core/tests/test-user-roles.php` dijalankan dan seluruh pengujian PASS (test belum sempat dieksekusi pada sesi ini karena PHP tidak tersedia di lingkungan pengembangan).
++### TASK-020: Buat Role Operator [DONE]
++* **Status:** Selesai (DONE) - 2026-10-07. `tests/test-user-roles.php` dieksekusi di PHP lokal (XAMPP): 40/40 pengujian PASS.
+ * **Tujuan:** Mendaftarkan peran user WordPress baru `ryokourent_operator` ("Operator Ryokourent") dengan hak akses terbatas pada menu operasional harian rental motor.
+ * **File yang Dibuat/Diubah:**
+   * `wp-content/plugins/ryokourent-core/includes/user-roles.php` (baru)
+-- 
+2.43.0
+
