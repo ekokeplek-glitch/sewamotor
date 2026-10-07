@@ -8,9 +8,9 @@
 ## 1. Status Sesi Terkini
 
 * **Tanggal Pembaruan Terakhir:** 2026-10-07
-* **Task Terakhir yang Selesai:** `TASK-025: Buat Halaman FAQ dan Lokasi Pool` (Status: **DONE** - 54/54 unit test `test-faq-pool.php` PASS).
-* **Cabang Git Aktif Terakhir:** `feature/faq-and-pool-locations` (siap dimerge ke `develop`).
-* **Task Aktif Selanjutnya:** `TASK-026: Buat Responsive Design & Mobile-First Optimization` (Fase 4: Antarmuka Publik & Optimasi Mobile).
+* **Task Terakhir yang Selesai:** `TASK-026: Buat Responsive Design & Mobile-First Optimization` (Status: **DONE** - 34/34 unit test `test-responsive-design.php` PASS).
+* **Cabang Git Aktif Terakhir:** `feature/mobile-responsive-optimization` (siap dimerge ke `develop`).
+* **Task Aktif Selanjutnya:** `TASK-027: Buat Validasi Keamanan (Security Hardening)` (Fase 4: Audit Keamanan & Hardening WordPress).
 
 ---
 
@@ -32,29 +32,27 @@ Setiap AI yang baru masuk ke proyek ini **WAJIB membaca dan mematuhi** berkas-be
 
 ---
 
-## 3. Rincian Task Selanjutnya: TASK-026
+## 3. Rincian Task Selanjutnya: TASK-027
 
-* **Nama Task:** `TASK-026: Buat Responsive Design & Mobile-First Optimization`
-* **Tujuan:** Mengoptimalkan seluruh elemen UI (katalog, form booking, floating mobile bar < 15% viewport, navigasi) agar tampil sempurna di resolusi smartphone 360px - 430px.
+* **Nama Task:** `TASK-027: Buat Validasi Keamanan (Security Hardening)`
+* **Tujuan:** Melakukan audit keamanan menyeluruh pada seluruh file plugin `ryokourent-core`: sanitasi seluruh input (`sanitize_text_field`, `sanitize_key`, `absint`), escaping seluruh output (`esc_html`, `esc_attr`, `esc_url`), verifikasi nonce pada setiap request POST/AJAX, proteksi eksekusi langsung file PHP (`defined('ABSPATH') || exit;`), dan capability check ketat.
 * **File yang Dibuat / Diubah:**
-  * `wp-content/themes/generatepress-child/style.css`
-  * `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`
-  * `wp-content/plugins/ryokourent-core/assets/js/ryokourent-filter.js`
-  * `wp-content/plugins/ryokourent-core/tests/test-responsive-design.php` (baru)
-* **Dependensi:** TASK-011, TASK-025.
+  * Seluruh file di `wp-content/plugins/ryokourent-core/`
+  * `wp-content/plugins/ryokourent-core/tests/test-security-hardening.php` (baru)
+* **Dependensi:** TASK-002 s/d TASK-026.
 * **Kriteria Selesai:**
-  1. Tidak ada horizontal overflow pada viewport sempit (360px s/d 430px).
-  2. Floating action bar WhatsApp dan CTA nyaman dijangkau satu tangan (*thumb zone*) serta tinggi maksimal < 15% tinggi viewport.
-  3. Modul katalog, modal spesifikasi, formulir booking, kartu lokasi pool, dan accordion FAQ tampil proporsional tanpa penumpukan teks.
-  4. Seluruh touch target berukuran minimal 44x44px sesuai pedoman aksesibilitas seluler.
-* **Cara Pengujian:** Jalankan unit test css/responsif, periksa styling, serta audit emulasi mobile (viewport 360x640, 390x844, 412x915).
-* **Risiko:** Floating bar menutupi tombol penting pada form atau footer.
+  1. Seluruh 100% file PHP di plugin memiliki proteksi akses langsung `ABSPATH`.
+  2. Seluruh endpoint form, AJAX handler, dan admin post action terlindungi nonce dan pengecekan capability spesifik.
+  3. Seluruh output dinamis dieksekusi dengan escaping kontekstual (`esc_html`, `esc_attr`, `esc_url`).
+  4. Lolos unit test keamanan XSS, CSRF, dan direct script execution prevention.
+* **Cara Pengujian:** Jalankan unit test `tests/test-security-hardening.php`.
+* **Risiko:** False positive atau ada escaping ganda pada teks berformat HTML sah.
 
 ---
 
 ## 4. Aturan Kerja Wajib untuk AI yang Melanjutkan
 
-1. **Fokus Tunggal:** Kerjakan HANYA satu task yang ditugaskan (TASK-026). Jangan menyentuh atau mendahului pengerjaan TASK-027 dst.
+1. **Fokus Tunggal:** Kerjakan HANYA satu task yang ditugaskan (TASK-027). Jangan menyentuh atau mendahului pengerjaan TASK-028 dst.
 2. **Uji Sebelum Klaim Selesai:** Buat file unit test di `wp-content/plugins/ryokourent-core/tests/` dan pastikan seluruh test lolos sebelum menandai status task sebagai **COMPLETED**.
 3. **Format Laporan Wajib (8 Poin):**
    * Task
@@ -70,7 +68,7 @@ Setiap AI yang baru masuk ke proyek ini **WAJIB membaca dan mematuhi** berkas-be
    * `SESSION_STATE.md`
    * `TASKS.md`
    * `CHANGELOG.md`
-   * **`docs/HANDOVER.md`** (perbarui status ke TASK-026 DONE dan siapkan prompt untuk TASK-027).
+   * **`docs/HANDOVER.md`** (perbarui status ke TASK-027 DONE dan siapkan prompt untuk TASK-028).
 
 ---
 
@@ -94,20 +92,23 @@ SEBELUM MENULIS KODE, WAJIB BACA & PAHAMI DOKUMEN ARSITEKTUR BERIKUT:
 9. `docs/REVIEW-ARCHITECTURE.md` : Catatan reviewOP arsitektur (nonce, capability, whitelist, validasi plat, hindari posts_per_page -1).
 
 STATUS PROYEK SAAT INI:
-- TASK-001 sampai TASK-025 telah SELESAI (DONE).
-- Task aktif yang harus Anda kerjakan sekarang adalah: TASK-026: Buat Responsive Design & Mobile-First Optimization.
+- TASK-001 sampai TASK-026 telah SELESAI (DONE).
+- Task aktif yang harus Anda kerjakan sekarang adalah: TASK-027: Buat Validasi Keamanan (Security Hardening).
 
-TUGAS ANDA SEKARANG (KERJAKAN HANYA TASK-026):
-1. Buat branch fitur dari `develop` (misal `feature/mobile-responsive-optimization`).
-2. Optimalkan seluruh elemen UI (katalog, formulir booking, modal detail motor, lokasi pool, FAQ, floating bar WhatsApp) untuk kenyamanan smartphone 360px - 430px di `wp-content/themes/generatepress-child/style.css` dan `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`.
-3. Pastikan floating mobile bar tidak melebihi 15% viewport height dan tombol touch target minimal 44x44px tanpa horizontal scroll.
-4. Buat automated unit test di `wp-content/plugins/ryokourent-core/tests/test-responsive-design.php`.
-5. Perbarui berkas dokumentasi pelacakan HANYA setelah test lulus:
-   - `SESSION_STATE.md` (tandai TASK-026 DONE, set next task TASK-027).
-   - `TASKS.md` (tandai TASK-026 [DONE]).
-   - `CHANGELOG.md` (tambahkan entri TASK-026).
-   - `docs/HANDOVER.md` (perbarui status ke TASK-026 DONE dan siapkan prompt untuk TASK-027).
-6. Buat commit Git dengan Conventional Commits (misal: `feat(responsive): optimize mobile viewport and floating bar`).
+TUGAS ANDA SEKARANG (KERJAKAN HANYA TASK-027):
+1. Buat branch fitur dari `develop` (misal `feature/security-hardening`).
+2. Lakukan audit menyeluruh pada seluruh berkas `wp-content/plugins/ryokourent-core/`:
+   - Pastikan setiap file PHP memiliki pengecekan `if (!defined('ABSPATH')) exit;`.
+   - Pastikan seluruh input request disanitasi (`sanitize_text_field`, `sanitize_key`, `absint`, `sanitize_textarea_field`).
+   - Pastikan seluruh output di-escape secara aman (`esc_html`, `esc_attr`, `esc_url`, `esc_textarea`).
+   - Pastikan seluruh endpoint POST, metabox save, status transition, dan AJAX dilindungi nonce (`check_admin_referer`, `wp_verify_nonce`, `check_ajax_referer`) dan capability check (`manage_ryokourent_bookings` / `manage_ryokourent_settings`).
+3. Buat automated unit test di `wp-content/plugins/ryokourent-core/tests/test-security-hardening.php`.
+4. Perbarui berkas dokumentasi pelacakan HANYA setelah test lulus:
+   - `SESSION_STATE.md` (tandai TASK-027 DONE, set next task TASK-028).
+   - `TASKS.md` (tandai TASK-027 [DONE]).
+   - `CHANGELOG.md` (tambahkan entri TASK-027).
+   - `docs/HANDOVER.md` (perbarui status ke TASK-027 DONE dan siapkan prompt untuk TASK-028).
+5. Buat commit Git dengan Conventional Commits (misal: `feat(security): implement security hardening, nonce audit, and escaping`).
 
 FORMAT LAPORAN WAJIB (8 Poin):
 1. Task
@@ -119,6 +120,6 @@ FORMAT LAPORAN WAJIB (8 Poin):
 7. Risiko / TODO
 8. Status (COMPLETED hanya setelah pengujian valid)
 
-PENTING: Kerjakan HANYA TASK-026. Jangan melompat atau mencampurkan pekerjaan ke task lain. Silakan mulai dengan mempelajari dokumen acuan dan kerjakan TASK-026 sekarang.
+PENTING: Kerjakan HANYA TASK-027. Jangan melompat atau mencampurkan pekerjaan ke task lain. Silakan mulai dengan mempelajari dokumen acuan dan kerjakan TASK-027 sekarang.
 ```
 

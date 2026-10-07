@@ -787,3 +787,69 @@ function ryokourent_render_bromo_advisory_banner() {
     <?php
     return ob_get_clean();
 }
+
+/**
+ * Render Floating Mobile Action Bar (TASK-026: Mobile-First Optimization).
+ *
+ * Requirements:
+ * - Height strictly <= 15% viewport (< ~85px on mobile).
+ * - Ergonomic single-thumb interaction zone.
+ * - Minimum 44x44px touch targets.
+ * - Direct zero-friction access to WhatsApp and Booking Form.
+ * - Displays quick status/hours indicator (07:00-23:00 WIB).
+ *
+ * @since 1.0.0
+ * @param array $args Optional custom arguments.
+ * @return string HTML rendered output.
+ */
+function ryokourent_render_floating_mobile_bar($args = array()) {
+    $settings   = function_exists('ryokourent_get_settings') ? ryokourent_get_settings() : array();
+    $wa_number  = !empty($settings['wa_primary']) ? $settings['wa_primary'] : (defined('RYOKOURENT_DEFAULT_WA_NUMBER') ? RYOKOURENT_DEFAULT_WA_NUMBER : '62895384017772');
+    $clean_wa   = preg_replace('/[^0-9]/', '', (string) $wa_number);
+    $hours_open = !empty($settings['pool_open']) ? $settings['pool_open'] : '07:00';
+    $hours_close = !empty($settings['pool_close']) ? $settings['pool_close'] : '23:00';
+
+    $wa_msg = isset($args['wa_message']) ? $args['wa_message'] : 'Halo Admin Ryokourent, saya ingin tanya ketersediaan sewa motor di Malang/Batu hari ini.';
+    $wa_url = 'https://api.whatsapp.com/send?phone=' . esc_attr($clean_wa) . '&text=' . rawurlencode($wa_msg);
+    $booking_anchor = isset($args['booking_anchor']) ? $args['booking_anchor'] : '#booking-form';
+
+    ob_start();
+    ?>
+    <nav class="ryokou-floating-mobile-bar" aria-label="<?php esc_attr_e('Aksi Cepat Mobile Ryokourent', 'ryokourent'); ?>" role="navigation">
+        <div class="ryokou-floating-inner">
+            <!-- Left Info Block: Operating Hours & Status -->
+            <div class="ryokou-floating-info">
+                <span class="ryokou-floating-status">
+                    <span class="ryokou-pulse-dot" aria-hidden="true"></span>
+                    <span class="ryokou-status-text"><?php esc_html_e('Buka', 'ryokourent'); ?></span>
+                </span>
+                <span class="ryokou-floating-hours"><?php echo esc_html($hours_open . ' - ' . $hours_close); ?> WIB</span>
+            </div>
+
+            <!-- Right Action Group: Thumb Friendly Targets -->
+            <div class="ryokou-floating-actions">
+                <a
+                    href="<?php echo esc_url($booking_anchor); ?>"
+                    class="ryokou-floating-btn ryokou-floating-btn-book"
+                    aria-label="<?php esc_attr_e('Pesan motor sekarang', 'ryokourent'); ?>"
+                >
+                    <span class="ryokou-btn-icon" aria-hidden="true">⚡</span>
+                    <span class="ryokou-btn-label"><?php esc_html_e('Form Sewa', 'ryokourent'); ?></span>
+                </a>
+                <a
+                    href="<?php echo esc_url($wa_url); ?>"
+                    class="ryokou-floating-btn ryokou-floating-btn-wa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="<?php esc_attr_e('Chat WhatsApp Admin Ryokourent', 'ryokourent'); ?>"
+                >
+                    <span class="ryokou-btn-icon" aria-hidden="true">💬</span>
+                    <span class="ryokou-btn-label"><?php esc_html_e('Chat WA', 'ryokourent'); ?></span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <?php
+    return ob_get_clean();
+}
+

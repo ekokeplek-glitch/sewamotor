@@ -91,4 +91,10 @@ if (function_exists('wp_enqueue_script')) {
 </main>
 
 <?php
+// Output floating mobile bar if function exists (TASK-026)
+if (function_exists('ryokourent_render_floating_mobile_bar')) {
+    echo ryokourent_render_floating_mobile_bar(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
 get_footer();
+

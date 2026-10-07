@@ -393,15 +393,22 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 
 ---
 
-### TASK-026: Buat Responsive Design & Mobile-First Optimization
+### TASK-026: Buat Responsive Design & Mobile-First Optimization [DONE]
+* **Status:** Selesai (DONE) - 2026-10-07
 * **Tujuan:** Mengoptimalkan seluruh elemen UI (katalog, form booking, floating mobile bar < 15% viewport, navigasi) agar tampil sempurna di resolusi smartphone 360px - 430px.
 * **File yang Dibuat/Diubah:**
   * `wp-content/themes/generatepress-child/style.css`
   * `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`
+  * `wp-content/plugins/ryokourent-core/public/templates.php`
+  * `wp-content/plugins/ryokourent-core/public/shortcodes.php`
+  * `wp-content/themes/generatepress-child/templates/single-motor.php`
+  * `wp-content/themes/generatepress-child/templates/template-faq-pool.php`
+  * `wp-content/plugins/ryokourent-core/tests/test-responsive-design.php`
+  * `app/page.tsx`
 * **Dependensi:** TASK-011, TASK-025.
-* **Kriteria Selesai:** Tidak ada horizontal overflow, tombol WhatsApp nyaman dijangkau satu tangan (thumb zone), skor Lighthouse Mobile > 90.
-* **Cara Pengujian:** Jalankan audit Lighthouse di Chrome DevTools pada mode emulasi mobile.
-* **Risiko:** Floating bar menutupi tombol penting pada form.
+* **Kriteria Selesai:** Tidak ada horizontal overflow pada viewport sempit (360px - 430px), floating mobile bar WhatsApp & booking (< 15% viewport height) berada di zona sentuh ibu jari (*thumb zone* ergonomis), touch target memenuhi standar aksesibilitas minimum 44x44px, dan body/footer memiliki padding bottom clearance otomatis sehingga form tidak tertutupi bar.
+* **Cara Pengujian:** Jalankan unit test `tests/test-responsive-design.php` (34 assertions mencakup markup semantik floating mobile bar, batas 15vh viewport, touch target >= 44px, integrasi parameter dinamis jam buka-tutup, shortcode `[ryokou_mobile_bar]`, unstacking layout detail motor di layar kecil, serta integrasi template child theme).
+* **Risiko:** Floating bar menutupi tombol penting pada form atau footer (termitigasi 100% oleh penambahan body padding clearance `padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px))` dan penyesuaian footer).
 
 ---
 

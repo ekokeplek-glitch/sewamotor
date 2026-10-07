@@ -226,4 +226,34 @@ function ryokourent_bromo_advisory_shortcode() {
 }
 add_shortcode('ryokou_bromo_advisory', 'ryokourent_bromo_advisory_shortcode');
 
+/**
+ * Shortcode callback for [ryokou_mobile_bar].
+ *
+ * Displays mobile bottom floating action bar with WhatsApp and Booking CTAs (TASK-026).
+ *
+ * @since 1.0.0
+ * @param array $atts Shortcode attributes.
+ * @return string HTML rendered output.
+ */
+function ryokourent_mobile_bar_shortcode($atts = array()) {
+    wp_enqueue_style('ryokourent-public');
+
+    $parsed_atts = shortcode_atts(
+        array(
+            'booking_anchor' => '#booking-form',
+            'wa_message'     => '',
+        ),
+        $atts,
+        'ryokou_mobile_bar'
+    );
+
+    if (function_exists('ryokourent_render_floating_mobile_bar')) {
+        return ryokourent_render_floating_mobile_bar($parsed_atts);
+    }
+
+    return '';
+}
+add_shortcode('ryokou_mobile_bar', 'ryokourent_mobile_bar_shortcode');
+
+
 

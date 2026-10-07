@@ -8,6 +8,26 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-07
 
 ### Added
+- **Fase 4 (TASK-026: Buat Responsive Design & Mobile-First Optimization):**
+  - Implementasi komponen Floating Mobile Action Bar di `public/templates.php`:
+    - Fungsi `ryokourent_render_floating_mobile_bar()`: Bar bawah mengambang yang responsif dengan status jam operasional (07:00 - 23:00 WIB), indikator animasi pulse dot, tombol akses cepat formulir booking, dan tautan langsung WhatsApp admin.
+    - Dukungan kustomisasi dinamis via parameter (`wa_message`, `booking_anchor`) serta sinkronisasi otomatis ke pengaturan `ryokourent_get_settings()`.
+  - Pendaftaran shortcode baru di `public/shortcodes.php`:
+    - `[ryokou_mobile_bar]` (render floating mobile action bar untuk integrasi theme atau page builder).
+  - Peningkatan styling CSS Mobile-First di `assets/css/ryokourent-public.css`:
+    - Pembatasan tinggi ketat bar mengambang (`max-height: 15vh`, <= 15% tinggi viewport HP sesuai blueprint).
+    - Ergonomi *thumb zone*: tombol aksi mudah dijangkau dengan ibu jari satu tangan.
+    - Ukuran touch target minimum 44x44px (`min-height: 44px`) untuk aksesibilitas seluler.
+    - Clearance padding otomatis pada body (`padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px))`) untuk memastikan formulir dan footer tidak tertutup floating bar.
+    - Pencegahan horizontal overflow (`overflow-x: hidden`) pada resolusi smartphone sempit (360px - 430px).
+    - Optimasi grid katalog, kartu pool, tombol maps, filter horizontal scrollable, dan accordion FAQ pada layar kecil.
+  - Peningkatan responsivitas pada Child Theme `wp-content/themes/generatepress-child/style.css`:
+    - Unstacking posisi sticky pricing card menjadi static di layar mobile untuk alur baca natural.
+    - Sentuhan tombol dan breadcrumb breadcrumb navigation memenuhi touch target 44px.
+    - Integrasi floating mobile bar pada template detail motor `single-motor.php` (dengan pre-filled pesan unit motor) dan template halaman `template-faq-pool.php`.
+  - Penambahan floating mobile action bar pada aplikasi Next.js `app/page.tsx` dengan transisi halus dan clearance footer.
+  - Pembuatan automated unit test `tests/test-responsive-design.php` (34 pengujian komprehensif, seluruhnya PASS).
+
 - **Fase 3 (TASK-025: Buat Halaman FAQ dan Lokasi Pool):**
   - Implementasi fungsi katalog informasi pool dan FAQ blueprint di `public/templates.php`:
     - `ryokourent_get_faq_items()`: 7 poin FAQ resmi blueprint (dokumen persyaratan e-KTP asli + 2 pendukung, larangan matik ke pasir Bromo karena overheat CVT & slip, kewajiban Trail CRF 150L, layanan antar-jemput fleksibel, jam operasional 07:00-23:00 WIB, overtime grace period 2 jam gratis, dan batas wilayah Malang-Batu).

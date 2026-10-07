@@ -1388,8 +1388,8 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#0b1120] border-t border-[#223249] py-12 text-xs text-slate-400">
+      {/* Footer with Mobile Clearance */}
+      <footer className="bg-[#0b1120] border-t border-[#223249] pt-12 pb-24 sm:pb-12 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-white text-sm">Ryokourent</span>
@@ -1400,6 +1400,46 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
           </div>
         </div>
       </footer>
+
+      {/* Floating Mobile Bar (< 15% viewport height, single-thumb friendly, minimum 44px touch target) (TASK-026) */}
+      <aside
+        aria-label="Aksi Cepat Mobile Ryokourent"
+        className="fixed bottom-0 inset-x-0 z-50 sm:hidden bg-[#0b1120]/95 backdrop-blur-md border-t border-[#223249] shadow-2xl px-4 py-2.5 max-h-[15vh]"
+      >
+        <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
+          {/* Quick status */}
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 uppercase tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span>Buka Sekarang</span>
+            </div>
+            <span className="text-[10px] text-slate-400 truncate">07:00 - 23:00 WIB</span>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href="#booking-form"
+              className="inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl bg-[#162032] hover:bg-[#1e2c44] border border-[#223249] text-xs font-bold text-slate-200 transition-all active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Form Sewa</span>
+            </a>
+            <a
+              href={`https://api.whatsapp.com/send?phone=62895384017772&text=${encodeURIComponent(
+                'Halo Admin Ryokourent, saya ingin tanya ketersediaan sewa motor di Malang/Batu hari ini.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl bg-[#25d366] hover:bg-[#128c7e] text-xs font-bold text-white shadow-lg shadow-emerald-950/40 transition-all active:scale-95"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Chat WA</span>
+            </a>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }
+

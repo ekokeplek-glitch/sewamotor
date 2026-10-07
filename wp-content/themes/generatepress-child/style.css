@@ -498,4 +498,64 @@ body {
   border-top: 1px solid var(--ryokou-border-dark);
 }
 
+/* ==========================================================================
+   Mobile-First Optimization & Thumb Zone Ergonomics (TASK-026)
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow on narrow screens */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Single motor page responsive compacting */
+  .ryokou-single-motor-wrapper {
+    padding: 1rem 0.5rem 5rem;
+  }
+
+  .ryokou-single-title {
+    font-size: 1.65rem;
+    line-height: 1.25;
+  }
+
+  .ryokou-single-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .ryokou-single-specs-card,
+  .ryokou-single-inclusions,
+  .ryokou-single-desc,
+  .ryokou-pricing-card {
+    padding: 1.15rem;
+    border-radius: 10px;
+  }
+
+  /* Sticky pricing card un-stickies on mobile for natural reading order */
+  .ryokou-pricing-card {
+    position: static;
+    margin-top: 1rem;
+  }
+
+  /* Minimum touch target size 44px */
+  .ryokou-btn,
+  .ryokou-back-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ryokou-tier-row {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Ensure footer has clearance for floating bar */
+  .site-footer,
+  footer {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+
 

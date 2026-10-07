@@ -269,6 +269,14 @@ while (have_posts()) :
     </div>
 
     <?php
+    // Output floating mobile bar with current unit context (TASK-026)
+    if (function_exists('ryokourent_render_floating_mobile_bar')) {
+        echo ryokourent_render_floating_mobile_bar(array(
+            'wa_message'     => "Halo Admin Ryokourent, saya ingin menyewa unit " . $title . " di Malang/Batu. Mohon info ketersediaan slot.",
+            'booking_anchor' => home_url('/#booking-form?motor_id=' . $post_id),
+        )); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    }
 endwhile;
 
 get_footer();
+
