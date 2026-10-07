@@ -26,7 +26,7 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
 * **Task Terakhir Selesai:** `Pembaruan Aturan Bisnis & Kontrol Operasional Admin` (Kelanjutan TASK-026 menuju TASK-027)
-* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-business-rules.php` 26/26 PASS, Kompilasi Next.js Succeeded.
+* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-business-rules.php` 26/26 PASS.
 * **Task Selanjutnya:** `TASK-027: Buat Validasi Keamanan (Security Hardening)` (Menunggu aba-aba selanjutnya dari pengguna)
 
 ---

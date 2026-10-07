@@ -68,7 +68,7 @@ wp-content/
 │       └── tests/
 │           ├── test-helpers.php         # Unit test helper sanitasi & durasi
 │           ├── test-cpt-motor.php       # Unit test CPT motor & meta sanitasi
-│           ├── test-pricing.php         # Unit test kalkulator harga
+│           ├── test-pricing-calculation.php # Unit test kalkulator harga
 │           └── test-availability.php    # Unit test pencegahan double booking
 │
 └── themes/

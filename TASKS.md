@@ -425,7 +425,7 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 ### TASK-028: Buat Pengujian Manual dan Otomatis
 * **Tujuan:** Menjalankan rangkaian unit test kalkulasi tarif, tes ketersediaan kuota, serta pengujian manual end-to-end dari pemilihan motor hingga pesan WhatsApp diterima.
 * **File yang Dibuat/Diubah:**
-  * `wp-content/plugins/ryokourent-core/tests/test-pricing.php`
+  * `wp-content/plugins/ryokourent-core/tests/test-pricing-calculation.php`
   * `wp-content/plugins/ryokourent-core/tests/test-availability.php`
   * `TESTING.md`
 * **Dependensi:** TASK-027.

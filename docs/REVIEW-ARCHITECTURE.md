@@ -83,5 +83,5 @@ Reviewer: Claude. Tanggal: 2026-10-01.
 8. **Nonce dan cache (M1):** Aktifkan cache halaman dan uji submit dari halaman lama sebagai pengunjung tanpa login.
 9. **WhatsApp (M3):** Uji di iOS Safari dan Android Chrome dengan popup blocker aktif. Baris baru, emoji, `&`, dan `#` harus terkirim utuh.
 10. **Aksi admin (M7):** Ulangi quick action dan bulk price tanpa nonce atau sebagai Operator; harus ditolak. Uji nilai negatif dan persentase ekstrem.
-11. **Pricing (M4):** Setelah aturan diputuskan, jalankan `test-pricing.php` untuk 1, 3, 7, 35 hari, contoh 56,5 jam, dan harga kosong.
+11. **Pricing (M4):** Setelah aturan diputuskan, jalankan `test-pricing-calculation.php` untuk 1, 3, 7, 35 hari, contoh 56,5 jam, dan harga kosong.
 12. **Aktivasi/deaktivasi (M13):** Aktifkan lalu nonaktifkan plugin. `/motor/` langsung bisa dibuka tanpa simpan Permalinks manual, dan role/capability tetap konsisten.

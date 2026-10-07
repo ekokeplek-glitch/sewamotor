@@ -51,18 +51,19 @@ Review manual oleh *Lead Engineer / Product Owner (Human)* **WAJIB** dilakukan p
 ### A. Struktur Cabang (Branches)
 * `main`: Branch produksi resmi. Kode harus 100% stabil, telah diaudit, dan siap rilis.
 * `develop`: Branch integrasi utama seluruh fitur.
-* `feature/nama-fitur`: Branch untuk mengerjakan task spesifik (dibuat dari `develop`).
-* `fix/nama-masalah`: Branch untuk perbaikan bug yang ditemukan saat testing.
-* `hotfix/nama-masalah`: Branch darurat dari `main` jika ditemukan masalah kritis di produksi.
+* `feature/id-deskripsi-singkat`: Branch untuk mengerjakan task spesifik (dibuat dari `develop`).
+* `fix/id-deskripsi-masalah`: Branch untuk perbaikan bug yang ditemukan saat testing.
+* `hotfix/deskripsi-darurat`: Branch darurat dari `main` jika ditemukan masalah kritis di produksi.
 
 ### B. Konvensi Penamaan Branch
-* `feature/task-004-cpt-motor`
-* `feature/task-009-cpt-booking`
-* `feature/task-014-pricing-engine`
-* `feature/task-016-availability-check`
-* `feature/task-018-whatsapp-generator`
-* `feature/task-022-admin-dashboard`
-* `fix/task-017-double-booking-race-condition`
+Mengikuti `GIT_WORKFLOW.md` (sumber acuan tunggal): `feature/id-deskripsi-singkat`, `fix/id-deskripsi-masalah`, `hotfix/deskripsi-darurat`.
+* `feature/cpt-motor`
+* `feature/cpt-booking`
+* `feature/pricing`
+* `feature/availability`
+* `feature/whatsapp`
+* `feature/admin-dashboard`
+* `fix/overlapping-bookings`
 
 ### C. Standar Pesan Commit (Conventional Commits)
 Format wajib: `<type>(<scope>): <subject>`
@@ -87,12 +88,12 @@ Contoh:
 5. Kode lulus linting WordPress Coding Standards (`.phpcs.xml.dist`).
 6. Tidak ada kredensial, token, nomor telepon pribadi, atau API key rahasia yang ter-commit.
 7. Langkah pengujian (*testing instructions*) disertakan dengan jelas pada deskripsi PR.
-8. Berkas `docs/HANDOVER.md` telah diperbarui dengan status sesi terkini dan prompt siap salin untuk task berikutnya.
+8. `SESSION_STATE.md`, `TASKS.md`, dan `CHANGELOG.md` telah diperbarui, dan blok TARGET PEKERJAAN pada prompt di `docs/HANDOVER.md` telah menunjuk task berikutnya.
 
 ---
 
 ## 5. Protokol Handover Antar-AI (`docs/HANDOVER.md`)
-Untuk memungkinkan perpindahan pengerjaan antar model AI (Claude, Gemini, ChatGPT, dll.) sesuai kebutuhan optimasi tanpa kehilangan konteks atau merusak alur:
-1. Setiap AI yang menyelesaikan sebuah task WAJIB memperbarui `docs/HANDOVER.md`.
-2. Di dalam `docs/HANDOVER.md` harus tersedia prompt mandiri (*self-contained prompt*) yang menginstruksikan AI penerus untuk membaca `BLUEPRINT.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `DATA_MODEL.md`, `AI_RULES.md`, `SESSION_STATE.md`, dan `TASKS.md`.
-3. AI penerus tidak boleh melompat atau mencampurkan pekerjaan ke task di luar target yang tertera pada handover prompt.
+`docs/HANDOVER.md` hanya berfungsi sebagai prompt jembatan agar pengerjaan bisa berpindah antar model AI (Claude, Gemini, ChatGPT, dll.) tanpa kehilangan konteks. Status sesi dicatat di `SESSION_STATE.md`, bukan di berkas handover.
+1. Setiap AI yang menyelesaikan sebuah task WAJIB memperbarui blok TARGET PEKERJAAN pada prompt di `docs/HANDOVER.md` (task berikutnya, peran AI sesuai bagian 1, catatan khusus bila ada).
+2. Prompt tersebut harus mandiri (*self-contained*) dan menginstruksikan AI penerus membaca `SESSION_STATE.md`, `TASKS.md`, `AI_RULES.md`, `AI_WORKFLOW.md`, `BLUEPRINT.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`, `DECISIONS.md`, `GIT_WORKFLOW.md`, dan `REVIEW-ARCHITECTURE.md`.
+3. AI penerus tidak boleh melompat atau mencampurkan pekerjaan ke task di luar target yang tertera pada prompt.
