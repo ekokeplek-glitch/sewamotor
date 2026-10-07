@@ -298,3 +298,33 @@ function ryokourent_ajax_get_price_quote() {
 }
 add_action('wp_ajax_ryokourent_get_price_quote', 'ryokourent_ajax_get_price_quote');
 add_action('wp_ajax_nopriv_ryokourent_get_price_quote', 'ryokourent_ajax_get_price_quote');
+
+/**
+ * Programmatically update motorcycle rental pricing in post meta.
+ *
+ * @since 1.0.0
+ * @param int      $motor_id Motorcycle post ID.
+ * @param int      $daily    Daily rate in IDR.
+ * @param int|null $weekly   Weekly package rate in IDR (optional).
+ * @param int|null $monthly  Monthly package rate in IDR (optional).
+ * @return bool True on success, false if motor_id is invalid or daily rate <= 0.
+ */
+function ryokourent_update_motor_pricing($motor_id, $daily, $weekly = null, $monthly = null) {
+    $motor_id = absint($motor_id);
+    $daily    = (int) $daily;
+
+    if ($motor_id <= 0 || $daily <= 0) {
+        return false;
+    }
+
+    update_post_meta($motor_id, '_ryokou_price_daily', $daily);
+
+    if (null !== $weekly) {
+        update_post_meta($motor_id, '_ryokou_price_weekly', max(0, (int) $weekly));
+    }
+    if (null !== $monthly) {
+        update_post_meta($motor_id, '_ryokou_price_monthly', max(0, (int) $monthly));
+    }
+
+    return true;
+}

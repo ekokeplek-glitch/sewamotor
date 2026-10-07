@@ -6,10 +6,12 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 
 ## 1. Status Sesi Saat Ini
 * **Tanggal / Waktu:** 2026-10-07
-* **Cabang Git Aktif:** `feature/booking-status-actions` (dibuat dari `develop`)
+* **Cabang Git Aktif:** `feature/faq-and-pool-locations` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/faq-and-pool-locations` (Fitur halaman FAQ, 2 lokasi pool resmi, dan aturan Bromo CRF)
+  - `feature/admin-settings` (Fitur pengaturan harga, nomor WA, dan penyesuaian harga massal)
   - `feature/booking-status-actions` (Fitur quick action perubahan status booking & validasi plat)
   - `feature/admin-dashboard` (Fitur dashboard admin & pelaporan operasional)
   - `feature/capability-access` (Fitur pembatasan akses operator & guard 403 server-side)
@@ -21,9 +23,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `TASK-023: Buat Perubahan Status Booking (Quick Actions & Validasi Plat)`
-* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-booking-status-actions.php` 86/86 PASS.
-* **Task Selanjutnya:** `TASK-024: Buat Pengaturan Harga dan Nomor WhatsApp (Admin Settings)` (Menunggu perintah selanjutnya dari pengguna)
+* **Task Terakhir Selesai:** `TASK-025: Buat Halaman FAQ dan Lokasi Pool`
+* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-faq-pool.php` 36/36 PASS.
+* **Task Selanjutnya:** `TASK-026: Buat Responsive Design & Mobile-First Optimization` (Menunggu perintah selanjutnya dari pengguna)
 
 ---
 
@@ -54,12 +56,71 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 | **TASK-021** | Buat Capability dan Pembatasan Akses | FASE 3 | **DONE** | TASK-020 | 2026-10-07 |
 | **TASK-022** | Buat Dashboard Booking & Operasional Armada | FASE 3 | **DONE** | TASK-010, TASK-019 | 2026-10-07 |
 | **TASK-023** | Buat Perubahan Status Booking (Quick Actions & Validasi Plat) | FASE 3 | **DONE** | TASK-022 | 2026-10-07 |
-| **TASK-024** | Buat Pengaturan Harga dan Nomor WhatsApp | FASE 3 | PENDING | TASK-014, TASK-021 | - |
-| **TASK-025** | Buat Halaman FAQ dan Lokasi Pool | FASE 4 | PENDING | TASK-007 | - |
+| **TASK-024** | Buat Pengaturan Harga dan Nomor WhatsApp (Admin Settings) | FASE 3 | **DONE** | TASK-014, TASK-021 | 2026-10-07 |
+| **TASK-025** | Buat Halaman FAQ dan Lokasi Pool | FASE 4 | **DONE** | TASK-007, TASK-024 | 2026-10-07 |
+| **TASK-026** | Buat Responsive Design & Mobile-First Optimization | FASE 4 | PENDING | TASK-011, TASK-025 | - |
 
 ---
 
-## 3. Komponen yang Telah Diimplementasikan pada TASK-023
+## 3. Komponen yang Telah Diimplementasikan pada TASK-025
+1. **Pusat Informasi & 7 Poin FAQ Resmi (`public/templates.php`):**
+   - Implementasi `ryokourent_get_faq_items()` memuat 7 poin FAQ blueprint:
+     1. Dokumen jaminan (e-KTP Asli + 2 pendukung sah).
+     2. Larangan keras motor matik ke Lautan Pasir Bromo (alasan transmisi CVT debu, overheat, slip).
+     3. Kewajiban unit Honda Trail CRF 150L untuk rute Bromo (suspensi Showa, ban dual-purpose).
+     4. Layanan antar-jemput stasiun/hotel fleksibel menyesuaikan sikon.
+     5. Jam operasional pelayanan (07:00 – 23:00 WIB, terintegrasi dinamis dengan `ryokourent_get_settings()`).
+     6. Aturan 24 jam dan batas toleransi keterlambatan (overtime grace period 2 jam).
+     7. Batas wilayah Malang Raya & Kota Batu, kewajiban izin tertulis jika keluar batas wilayah.
+   - Render antarmuka FAQ `ryokourent_render_faq_section()` dengan banner syarat dokumen e-KTP dan struktur ARIA accessible (`aria-expanded`, `aria-controls`).
+2. **Area Layanan & Dua Lokasi Pool Resmi (`public/templates.php`):**
+   - Implementasi `ryokourent_get_pool_details()` dan `ryokourent_render_pool_locations_section()`:
+     - Pool 1: Malang Dinoyo (Pusat Kota / Kampus), Jl. MT Haryono Gg. 21 No. 23, Lowokwaru, Kota Malang.
+     - Pool 2: Batu Diponegoro (Kota Wisata Batu), Jl. Diponegoro No. 45, Kec. Batu, Kota Wisata Batu.
+     - Jam operasional resmi 07:00 – 23:00 WIB, tautan Google Maps dinamis (`rel="noopener noreferrer"`), dan catatan layanan antar-jemput fleksibel sikon.
+3. **Peringatan Wajib Keselamatan Rute Bromo (`public/templates.php`):**
+   - Implementasi `ryokourent_render_bromo_advisory_banner()` berlatar kontras tinggi dengan peran `role="alert"`, mengarahkan pengguna langsung ke tab filter Trail CRF 150L.
+4. **Pendaftaran Shortcodes Publik (`public/shortcodes.php`):**
+   - Shortcode `[ryokou_faq]` untuk menampilkan accordion FAQ 7 poin.
+   - Shortcode `[ryokou_pools]` untuk menampilkan 2 pool resmi.
+   - Shortcode `[ryokou_bromo_advisory]` untuk menampilkan banner peringatan Bromo.
+5. **Skrip Interaksi Accordion & Styling Dark Modern:**
+   - Skrip `assets/js/ryokourent-filter.js`: handler vanilla JS interaktif tanpa dependensi jQuery, toggle ARIA accordion responsif, dan auto-close sibling item.
+   - Stylesheet `assets/css/ryokourent-public.css` & `wp-content/themes/generatepress-child/style.css`: styling dark bertema modern navy/amber, banner dokumen, grid kartu pool, dan transisi halus.
+6. **Template Halaman GeneratePress Child Theme:**
+   - Berkas template page `wp-content/themes/generatepress-child/templates/template-faq-pool.php` dan file root `template-faq-pool.php`.
+7. **Automated Unit Test Suite:**
+   - `tests/test-faq-pool.php` (36 pengujian mencakup 7 poin FAQ blueprint, jam dinamis, detail 2 pool, link Google Maps, shortcodes, template child theme, ARIA attributes, dan escaping). 36/36 PASS.
+
+---
+
+## 3. Komponen yang Telah Diimplementasikan pada TASK-024
+1. **Modul Pengaturan Terpusat (`includes/settings.php`):**
+   - Fungsi getter konfigurasi default dan database (`ryokourent_get_default_settings()`, `ryokourent_get_settings()`, `ryokourent_get_operating_hours()`).
+   - Validasi ketat penyimpanan pengaturan umum: format seluler nomor WhatsApp utama (08xx/628xx), nomor WA cadangan, jam operasional pool (07:00-23:00 WIB, format waktu 24-jam, jam tutup > jam buka), serta link Google Maps kedua pool.
+   - Algoritma perhitungan penyesuaian harga aman (`ryokourent_calculate_adjusted_price()`):
+     - Pembatasan persentase ketat rentang aman $-50\%$ s/d $+200\%$.
+     - Penolakan penyesuaian nilai $0$ atau penyesuaian yang menghasilkan harga $\le 0$.
+     - Pembulatan persentase otomatis ke kelipatan seribu Rupiah terdekat.
+   - Eksekusi pembaruan harga massal armada (`ryokourent_apply_bulk_price_adjustment()`):
+     - Pemfilteran per kategori motor (`kategori_motor`) atau seluruh armada (`'all'`).
+     - Pemilihan paket tarif granular: Harian (`daily`), Mingguan (`weekly`), Bulanan (`monthly`), atau Semua.
+     - Validasi dua tahap (*two-pass validation*): simulasi seluruh unit terlebih dahulu; jika ada 1 unit armada saja yang menghasilkan tarif tidak valid ($\le 0$), seluruh operasi dibatalkan seketika (*fail-safe atomic rollback*).
+     - Menghindari kueri `posts_per_page => -1` dengan limit `posts_per_page => 100` dan `no_found_rows => true` (reviewOP M12).
+2. **Antarmuka Admin Pengaturan (`admin/admin-settings.php`):**
+   - Submenu terdaftar di bawah menu Penyewaan dan menu Armada Motor dengan capability `manage_ryokourent_settings`.
+   - Penjaga akses server-side mutlak: Operator diblokir dengan HTTP 403 Forbidden via `ryokourent_check_settings_permission_or_die()`.
+   - Tab navigasi responsif: Tab 1 (Kontak WhatsApp & Jam Operasional) dan Tab 2 (Penyesuaian Tarif Massal Peak Season).
+   - Seluruh form dilindungi nonce spesifik (`check_admin_referer`) dan seluruh output di-escape (`esc_html`, `esc_attr`, `esc_url`).
+   - Pratinjau tabel tarif armada saat ini untuk memudahkan admin melihat harga awal.
+3. **Penyempurnaan Pricing Engine (`includes/pricing.php`):**
+   - Penambahan fungsi pembantu `ryokourent_update_motor_pricing($motor_id, $daily, $weekly, $monthly)`.
+4. **Automated Unit Test Suite:**
+   - `tests/test-admin-settings.php` (44 pengujian: RBAC operator vs admin, 403 server-side guard, validasi WA, jam operasional, batasan harga nominal/persentase, penolakan persentase ekstrem, pembatalan atomik two-pass, pendaftaran menu, dan helper pricing). 44/44 PASS.
+
+---
+
+## 4. Komponen yang Telah Diimplementasikan pada TASK-023
 1. **Matriks Transisi Status Resmi (ADR-011 & `includes/booking.php`):**
    - Alur operasional lapangan: Menunggu -> Dikonfirmasi -> Berjalan -> Selesai.
    - Pembatalan hanya sebelum unit diserahkan (dari Menunggu atau Dikonfirmasi).

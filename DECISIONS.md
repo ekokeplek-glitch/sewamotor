@@ -111,3 +111,20 @@ Dokumen ini mencatat keputusan-keputusan arsitektural penting yang telah disepak
   6. Perubahan status memicu hook `transition_post_status` yang secara otomatis membuang cache transient statistik dashboard (`ryokourent_dashboard_stats`).
 * **Alasan:** Menjamin alur operasional armada motor berjalan tertib, aman, bebas overbooking race condition, dan bebas kesalahan alokasi plat nomor di lapangan.
 
+---
+
+### ADR-012: Pengaturan Terpusat Admin & Penyesuaian Harga Massal (Bulk Price Adjustment) dengan Batas Validasi Ketat
+* **Status:** Diterima (Accepted)
+* **Konteks:** Sesuai tinjauan arsitektur (reviewOP M7, TASKS TASK-024), pengelola rental membutuhkan antarmuka terpusat untuk nomor WhatsApp resmi, template salam pesan, jam operasional 2 pool, serta fitur penyesuaian harga massal (*bulk price adjustment*) saat musim liburan (*peak season* Lebaran, Nataru) atau promosi diskon. Fitur pembaruan harga massal berisiko tinggi merusak tarif master jika tidak dibatasi nilainya (misalnya salah ketik menghasilkan harga $\le 0$ atau persentase ekstrem).
+* **Keputusan:**
+  1. Halaman antarmuka admin settings (`admin/admin-settings.php`) dikunci eksklusif untuk wewenang Administrator (`manage_ryokourent_settings`). Operator rental ditolak secara server-side via `ryokourent_check_settings_permission_or_die()` yang menghasilkan respon HTTP 403 Forbidden.
+  2. Seluruh formulir pengaturan dan bulk update dilindungi nonce spesifik (`check_admin_referer`).
+  3. Nomor WhatsApp utama divalidasi format seluler Indonesia (08xx / 628xx) dan jam operasional divalidasi format waktu 24-jam (00:00 - 23:59 WIB dengan aturan jam tutup > jam buka).
+  4. Penyesuaian harga massal menerapkan validasi batas keamanan (*safety boundary*):
+     - Kenaikan atau penurunan persentase dibatasi ketat antara $-50\%$ hingga $+200\%$.
+     - Seluruh hasil perhitungan harga baru wajib bernilai positif (lebih besar dari Rp 0).
+     - Penyesuaian persentase otomatis dibulatkan ke kelipatan seribu Rupiah terdekat untuk menjaga kerapian harga sewa.
+     - Diterapkan validasi dua tahap (*two-pass validation*): jika ada 1 unit armada saja dalam kategori yang menghasilkan harga tidak valid ($\le 0$), seluruh operasi dibatalkan seketika (*fail-safe atomic rollback*).
+  5. Pengambilan armada pada bulk update dibatasi (`posts_per_page => 100`, `no_found_rows => true`) untuk menghindari beban kueri `posts_per_page => -1` (reviewOP M12).
+* **Alasan:** Menjamin perlindungan data tarif master perusahaan dari kesalahan ketik atau manipulasi input, memastikan keselamatan finansial operasional, dan mencegah eskalasi wewenang oleh staf operator.
+

@@ -471,3 +471,31 @@ body {
   margin: 0;
 }
 
+/* ==========================================================================
+   FAQ & Pool Locations Page Template Styling (TASK-025)
+   ========================================================================== */
+.ryokou-page-faq-pools {
+  background-color: var(--ryokou-bg-dark);
+  color: var(--ryokou-text-main);
+  min-height: 80vh;
+}
+
+.ryokou-page-hero {
+  background: linear-gradient(180deg, rgba(22, 32, 50, 0.8) 0%, rgba(11, 17, 32, 1) 100%);
+  border-bottom: 1px solid var(--ryokou-border-dark);
+  padding: 2.5rem 1rem 3.5rem;
+}
+
+.ryokou-page-hero-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 1.5rem auto 0;
+}
+
+.ryokou-cta-callout-section {
+  padding: 4rem 1rem;
+  background: #080d19;
+  border-top: 1px solid var(--ryokou-border-dark);
+}
+
+

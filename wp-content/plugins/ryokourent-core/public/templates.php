@@ -487,3 +487,303 @@ function ryokourent_get_blueprint_default_fleet() {
         ),
     );
 }
+
+/**
+ * Retrieve the 7 official FAQ items based on the Ryokourent blueprint.
+ *
+ * @since 1.0.0
+ * @return array<int, array<string, string>> Array of FAQ items with question and answer.
+ */
+function ryokourent_get_faq_items() {
+    $settings   = function_exists('ryokourent_get_settings') ? ryokourent_get_settings() : array();
+    $open_hour  = !empty($settings['operational_open']) ? $settings['operational_open'] : '07:00';
+    $close_hour = !empty($settings['operational_close']) ? $settings['operational_close'] : '23:00';
+
+    return array(
+        array(
+            'id'       => 'faq-dokumen',
+            'question' => __('Apa saja dokumen persyaratan untuk menyewa motor di Ryokourent?', 'ryokourent'),
+            'answer'   => __('Penyewa wajib menunjukkan e-KTP Asli serta 2 (dua) dokumen identitas pendukung yang sah dan masih berlaku, seperti SIM A, Paspor, BPJS/KIS, NPWP, KTM Mahasiswa aktif (khusus mahasiswa Malang), atau ID Pegawai resmi. Foto dokumen dikirimkan langsung ke admin WhatsApp untuk verifikasi cepat tanpa perlu registrasi akun berbelit.', 'ryokourent'),
+        ),
+        array(
+            'id'       => 'faq-bromo-larangan',
+            'question' => __('Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo?', 'ryokourent'),
+            'answer'   => __('Karakter medan pasir berbisik Gunung Bromo sangat berat, berdebu pekat, dan bertemperatur ekstrem. Transmisi otomatis skutik (CVT) rawan kemasukan debu vulkanik, overheat, belt selip, hingga terbakar di tengah lautan pasir. Demi keselamatan jiwa penyewa dan integritas mesin, seluruh motor matik dilarang keras memasuki kawasan kaldera pasir Bromo. Pelanggaran aturan ini dikenakan sanksi denda dan ganti rugi pemulihan mesin penuh.', 'ryokourent'),
+        ),
+        array(
+            'id'       => 'faq-bromo-crf',
+            'question' => __('Motor apa yang WAJIB digunakan jika ingin bepergian ke Gunung Bromo?', 'ryokourent'),
+            'answer'   => __('Untuk perjalanan ke Gunung Bromo (Lautan Pasir, Pasir Berbisik, Savana Teletubbies, dan Penanjakan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban dual-purpose pacul berprofil tinggi, mesin bertenaga dengan ground clearance optimal yang tangguh dan aman melibas lautan pasir.', 'ryokourent'),
+        ),
+        array(
+            'id'       => 'faq-antar-jemput',
+            'question' => __('Apakah motor bisa diantar ke stasiun atau tempat menginap (hotel/villa)?', 'ryokourent'),
+            'answer'   => __('Bisa! Kami melayani serah terima langsung di 2 Pool resmi (Dinoyo Malang & Diponegoro Batu), serta layanan antar-jemput ke Stasiun Malang Kota Baru, Stasiun Malang Kota Lama, maupun hotel/homestay/villa di Malang Raya dan Kota Wisata Batu. Layanan pengantaran disesuaikan dengan situasi dan kondisi (sikon) tim lapangan pada jam operasional kami.', 'ryokourent'),
+        ),
+        array(
+            'id'       => 'faq-jam-operasional',
+            'question' => sprintf(
+                /* translators: 1: Jam buka, 2: Jam tutup */
+                __('Kapan jam operasional pelayanan dan serah terima armada?', 'ryokourent'),
+                $open_hour,
+                $close_hour
+            ),
+            'answer'   => sprintf(
+                /* translators: 1: Jam buka, 2: Jam tutup */
+                __('Jam pelayanan operasional Pool dan reservasi WhatsApp kami adalah pukul %s – %s WIB setiap hari. Serah terima unit, konfirmasi booking, dan pengembalian armada dilayani selama rentang jam tersebut.', 'ryokourent'),
+                esc_html($open_hour),
+                esc_html($close_hour)
+            ),
+        ),
+        array(
+            'id'       => 'faq-overtime',
+            'question' => __('Bagaimana aturan durasi sewa 24 jam dan batas toleransi pengembalian (overtime)?', 'ryokourent'),
+            'answer'   => __('Hitungan sewa kami adalah full 24 jam per hari. Kami memberikan toleransi keterlambatan pengembalian (grace period) gratis hingga 2 jam dari jam serah terima. Apabila keterlambatan melebihi 2 jam tanpa konfirmasi perpanjangan sewa kepada admin, maka berlaku tarif keterlambatan per jam proporsional atau dihitung paket hari berikutnya.', 'ryokourent'),
+        ),
+        array(
+            'id'       => 'faq-batas-wilayah',
+            'question' => __('Apakah motor boleh dibawa keluar wilayah Malang Raya dan Kota Batu?', 'ryokourent'),
+            'answer'   => __('Area operasional standar sewa motor adalah wilayah Malang Raya (Kota Malang, Kabupaten Malang pantai selatan/utara) dan Kota Wisata Batu. Penggunaan armada keluar batas wilayah Malang Raya (misal: Surabaya, Kediri, Blitar, Probolinggo di luar rute resmi Bromo CRF) WAJIB memperoleh izin tertulis terlebih dahulu dari Admin Ryokourent sebelum keberangkatan.', 'ryokourent'),
+        ),
+    );
+}
+
+/**
+ * Retrieve official pool locations merged with settings.
+ *
+ * @since 1.0.0
+ * @return array<string, array<string, mixed>> Array of pool details.
+ */
+function ryokourent_get_pool_details() {
+    $settings = function_exists('ryokourent_get_settings') ? ryokourent_get_settings() : array();
+
+    $open_hour  = !empty($settings['operational_open']) ? $settings['operational_open'] : '07:00';
+    $close_hour = !empty($settings['operational_close']) ? $settings['operational_close'] : '23:00';
+
+    return array(
+        'pool_dinoyo' => array(
+            'id'          => 'pool-dinoyo',
+            'code'        => 'Pool 1 (Kota Malang)',
+            'name'        => !empty($settings['pool_dinoyo_name']) ? $settings['pool_dinoyo_name'] : __('Pool Malang Dinoyo (Pusat Kota / Kampus)', 'ryokourent'),
+            'badge'       => __('Pusat Kota & Kampus', 'ryokourent'),
+            'address'     => !empty($settings['pool_dinoyo_address']) ? $settings['pool_dinoyo_address'] : __('Jl. MT Haryono Gg. 21 No. 23, Dinoyo, Lowokwaru, Kota Malang', 'ryokourent'),
+            'maps_url'    => !empty($settings['pool_dinoyo_maps']) ? $settings['pool_dinoyo_maps'] : 'https://maps.google.com/?q=Ryokourent+Dinoyo+Malang',
+            'hours'       => sprintf('%s – %s WIB', $open_hour, $close_hour),
+            'highlights'  => array(
+                __('Dekat kampus ternama (UB, UIN Maulana Malik Ibrahim, Polinema, Unisma, UM).', 'ryokourent'),
+                __('Akses kilat ke koridor kuliner Soekarno-Hatta (Suhat) & pusat oleh-oleh khas Malang.', 'ryokourent'),
+                __('Titik temu pengantaran cepat ke Stasiun Malang Kota Baru & Stasiun Malang Kota Lama.', 'ryokourent'),
+            ),
+        ),
+        'pool_batu' => array(
+            'id'          => 'pool-batu',
+            'code'        => 'Pool 2 (Kota Wisata Batu)',
+            'name'        => !empty($settings['pool_batu_name']) ? $settings['pool_batu_name'] : __('Pool Batu Diponegoro (Kota Wisata Batu)', 'ryokourent'),
+            'badge'       => __('Kota Wisata Batu', 'ryokourent'),
+            'address'     => !empty($settings['pool_batu_address']) ? $settings['pool_batu_address'] : __('Jl. Belakang Pompa Bensin, Jl. Diponegoro No. 45, Sisir, Kec. Batu, Kota Wisata Batu', 'ryokourent'),
+            'maps_url'    => !empty($settings['pool_batu_maps']) ? $settings['pool_batu_maps'] : 'https://maps.google.com/?q=Ryokourent+Batu',
+            'hours'       => sprintf('%s – %s WIB', $open_hour, $close_hour),
+            'highlights'  => array(
+                __('Berada tepat di jantung Kota Wisata Batu, dekat Alun-Alun Batu & Pos Ketan Legenda.', 'ryokourent'),
+                __('Akses langsung tanpa hambatan menuju Jatim Park 1, 2, 3, Museum Angkut, & BNS.', 'ryokourent'),
+                __('Titik awal nyaman untuk menjelajahi Selecta, Coban Rondo, paralayang, hingga Cangar.', 'ryokourent'),
+            ),
+        ),
+    );
+}
+
+/**
+ * Render FAQ Accordion HTML Component (7 points based on blueprint).
+ *
+ * @since 1.0.0
+ * @param array $args Optional styling or title overrides.
+ * @return string HTML rendered output.
+ */
+function ryokourent_render_faq_section($args = array()) {
+    $defaults = array(
+        'section_id'  => 'syarat-faq',
+        'title'       => __('Syarat Sewa & Pertanyaan Sering Diajukan (FAQ)', 'ryokourent'),
+        'subtitle'    => __('Transparansi penuh demi keselamatan, keamanan armada, dan kenyamanan liburan Anda di Malang & Batu.', 'ryokourent'),
+        'show_header' => true,
+    );
+    $parsed = wp_parse_args($args, $defaults);
+    $faqs   = ryokourent_get_faq_items();
+
+    ob_start();
+    ?>
+    <section class="ryokou-faq-section" id="<?php echo esc_attr($parsed['section_id']); ?>">
+        <div class="ryokou-faq-container">
+            <?php if ($parsed['show_header']) : ?>
+                <div class="ryokou-faq-header">
+                    <span class="ryokou-section-tag"><?php esc_html_e('PANDUAN & FAQ RESMI', 'ryokourent'); ?></span>
+                    <h2 class="ryokou-section-title"><?php echo esc_html($parsed['title']); ?></h2>
+                    <p class="ryokou-section-desc"><?php echo esc_html($parsed['subtitle']); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <!-- Document Requirements Banner -->
+            <div class="ryokou-req-banner">
+                <div class="ryokou-req-banner-icon">📋</div>
+                <div class="ryokou-req-banner-content">
+                    <h3 class="ryokou-req-banner-title"><?php esc_html_e('Syarat Dokumen Jaminan Sewa (Wajib e-KTP + 2 Pendukung)', 'ryokourent'); ?></h3>
+                    <p class="ryokou-req-banner-text">
+                        <?php esc_html_e('Setiap penyewa wajib menunjukkan e-KTP Asli serta 2 dokumen identitas pendukung sah (SIM A, Paspor, BPJS/KIS, NPWP, KTM Mahasiswa, atau ID Karyawan). Verifikasi dilakukan privat via WhatsApp tanpa penyimpanan dokumen publik.', 'ryokourent'); ?>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Accordion List -->
+            <div class="ryokou-accordion" role="region" aria-label="<?php esc_attr_e('Daftar Pertanyaan Umum Ryokourent', 'ryokourent'); ?>">
+                <?php foreach ($faqs as $index => $faq) : ?>
+                    <div class="ryokou-accordion-item" id="<?php echo esc_attr($faq['id']); ?>">
+                        <button
+                            type="button"
+                            class="ryokou-accordion-trigger"
+                            aria-expanded="false"
+                            aria-controls="<?php echo esc_attr($faq['id'] . '-content'); ?>"
+                            id="<?php echo esc_attr($faq['id'] . '-trigger'); ?>"
+                        >
+                            <span class="ryokou-accordion-q-num">Q<?php echo esc_html($index + 1); ?></span>
+                            <span class="ryokou-accordion-title"><?php echo esc_html($faq['question']); ?></span>
+                            <span class="ryokou-accordion-icon" aria-hidden="true">+</span>
+                        </button>
+                        <div
+                            class="ryokou-accordion-content"
+                            id="<?php echo esc_attr($faq['id'] . '-content'); ?>"
+                            role="region"
+                            aria-labelledby="<?php echo esc_attr($faq['id'] . '-trigger'); ?>"
+                            hidden
+                        >
+                            <div class="ryokou-accordion-body">
+                                <p><?php echo esc_html($faq['answer']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Render Official Pool Locations Section with Google Maps deep links.
+ *
+ * @since 1.0.0
+ * @param array $args Optional overrides.
+ * @return string HTML rendered output.
+ */
+function ryokourent_render_pool_locations_section($args = array()) {
+    $defaults = array(
+        'section_id'  => 'lokasi-pool',
+        'title'       => __('Area Layanan & Dua Lokasi Pool Resmi', 'ryokourent'),
+        'subtitle'    => __('Titik strategis di Kota Malang dan Kota Wisata Batu untuk serah terima unit langsung atau pengantaran ke tempat menginap Anda.', 'ryokourent'),
+        'show_header' => true,
+    );
+    $parsed = wp_parse_args($args, $defaults);
+    $pools  = ryokourent_get_pool_details();
+
+    ob_start();
+    ?>
+    <section class="ryokou-pools-section" id="<?php echo esc_attr($parsed['section_id']); ?>">
+        <div class="ryokou-pools-container">
+            <?php if ($parsed['show_header']) : ?>
+                <div class="ryokou-pools-header">
+                    <span class="ryokou-section-tag"><?php esc_html_e('POOL MALANG & BATU', 'ryokourent'); ?></span>
+                    <h2 class="ryokou-section-title"><?php echo esc_html($parsed['title']); ?></h2>
+                    <p class="ryokou-section-desc"><?php echo esc_html($parsed['subtitle']); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <!-- Pool Cards Grid -->
+            <div class="ryokou-pools-grid">
+                <?php foreach ($pools as $pool) : ?>
+                    <article class="ryokou-pool-card" id="<?php echo esc_attr($pool['id']); ?>">
+                        <div class="ryokou-pool-card-header">
+                            <div class="ryokou-pool-badge-wrap">
+                                <span class="ryokou-pool-code"><?php echo esc_html($pool['code']); ?></span>
+                                <span class="ryokou-badge ryokou-badge-city"><?php echo esc_html($pool['badge']); ?></span>
+                            </div>
+                            <span class="ryokou-pool-hours">
+                                <span class="ryokou-hours-icon">🕒</span> <?php echo esc_html($pool['hours']); ?>
+                            </span>
+                        </div>
+
+                        <div class="ryokou-pool-card-body">
+                            <h3 class="ryokou-pool-name"><?php echo esc_html($pool['name']); ?></h3>
+                            <p class="ryokou-pool-address">
+                                <span class="ryokou-pin-icon">📍</span> <?php echo esc_html($pool['address']); ?>
+                            </p>
+
+                            <div class="ryokou-pool-highlights">
+                                <h4 class="ryokou-highlights-title"><?php esc_html_e('Keunggulan Akses Lokasi:', 'ryokourent'); ?></h4>
+                                <ul class="ryokou-highlights-list">
+                                    <?php foreach ($pool['highlights'] as $highlight) : ?>
+                                        <li><?php echo esc_html($highlight); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="ryokou-pool-card-footer">
+                            <a
+                                href="<?php echo esc_url($pool['maps_url']); ?>"
+                                class="ryokou-btn ryokou-btn-maps"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="<?php echo esc_attr(sprintf(__('Buka peta Google Maps untuk %s', 'ryokourent'), $pool['name'])); ?>"
+                            >
+                                <span class="ryokou-btn-icon">🗺️</span>
+                                <span><?php esc_html_e('Buka di Google Maps', 'ryokourent'); ?></span>
+                            </a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Delivery Sikon Notice -->
+            <div class="ryokou-delivery-notice">
+                <div class="ryokou-delivery-icon">🛵</div>
+                <div class="ryokou-delivery-text">
+                    <strong><?php esc_html_e('Layanan Antar-Jemput Fleksibel Sesuai Situasi & Kondisi (Sikon):', 'ryokourent'); ?></strong>
+                    <span><?php esc_html_e(' Selain ambil langsung di kedua Pool resmi di atas, unit dapat diantar ke Stasiun Malang Kota Baru atau penginapan (hotel/homestay/villa) Anda di Malang & Batu dengan konfirmasi admin terlebih dahulu.', 'ryokourent'); ?></span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Render Bromo Mandatory Rules Banner (Trail CRF 150L).
+ *
+ * @since 1.0.0
+ * @return string HTML rendered output.
+ */
+function ryokourent_render_bromo_advisory_banner() {
+    ob_start();
+    ?>
+    <aside class="ryokou-bromo-advisory-banner" role="alert" aria-label="<?php esc_attr_e('Peringatan Keselamatan Trip Bromo', 'ryokourent'); ?>">
+        <div class="ryokou-bromo-advisory-inner">
+            <div class="ryokou-bromo-advisory-icon" aria-hidden="true">🌋</div>
+            <div class="ryokou-bromo-advisory-content">
+                <div class="ryokou-bromo-advisory-badge"><?php esc_html_e('ATURAN WAJIB TRIP BROMO', 'ryokourent'); ?></div>
+                <h3 class="ryokou-bromo-advisory-title">
+                    <?php esc_html_e('Unit Matik Dilarang ke Lautan Pasir Bromo — Wajib Honda Trail CRF 150L', 'ryokourent'); ?>
+                </h3>
+                <p class="ryokou-bromo-advisory-desc">
+                    <?php esc_html_e('Demi keselamatan jiwa dan mencegah kerusakan fatal transmisi CVT akibat debu vulkanik dan pasir hisap, seluruh unit motor matik (BeAT, Scoopy, Vario) DILARANG KERAS melintasi Kaldera Lautan Pasir Bromo. Trip ke Bromo WAJIB menyewa Honda Trail CRF 150L dengan suspensi upside-down Showa dan ban pacul dual-purpose.', 'ryokourent'); ?>
+                </p>
+                <div class="ryokou-bromo-advisory-actions">
+                    <a href="#katalog-motor" class="ryokou-btn ryokou-btn-amber-sm ryokou-filter-trigger-crf" data-filter="trail-adventure">
+                        <span><?php esc_html_e('Lihat Unit Trail CRF 150L Bromo Ready', 'ryokourent'); ?></span> &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <?php
+    return ob_get_clean();
+}

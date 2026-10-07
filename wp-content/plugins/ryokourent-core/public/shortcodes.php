@@ -140,3 +140,90 @@ function ryokourent_booking_form_shortcode($atts = array()) {
 }
 add_shortcode('ryokou_booking_form', 'ryokourent_booking_form_shortcode');
 
+/**
+ * Shortcode callback for [ryokou_faq].
+ *
+ * Displays the 7-item interactive accordion FAQ based on the Ryokourent blueprint.
+ *
+ * @since 1.0.0
+ * @param array $atts User-defined shortcode attributes.
+ * @return string HTML rendered output.
+ */
+function ryokourent_faq_shortcode($atts = array()) {
+    wp_enqueue_style('ryokourent-public');
+    wp_enqueue_script('ryokourent-filter');
+
+    $parsed_atts = shortcode_atts(
+        array(
+            'section_id'  => 'syarat-faq',
+            'title'       => __('Syarat Sewa & Pertanyaan Sering Diajukan (FAQ)', 'ryokourent'),
+            'subtitle'    => __('Transparansi penuh demi keselamatan, keamanan armada, dan kenyamanan liburan Anda di Malang & Batu.', 'ryokourent'),
+            'show_header' => 'yes',
+        ),
+        $atts,
+        'ryokou_faq'
+    );
+
+    $parsed_atts['show_header'] = ('no' !== $parsed_atts['show_header']);
+
+    if (function_exists('ryokourent_render_faq_section')) {
+        return ryokourent_render_faq_section($parsed_atts);
+    }
+
+    return '<div class="ryokou-notice">' . esc_html__('Modul FAQ Ryokourent belum dimuat.', 'ryokourent') . '</div>';
+}
+add_shortcode('ryokou_faq', 'ryokourent_faq_shortcode');
+
+/**
+ * Shortcode callback for [ryokou_pools].
+ *
+ * Displays the 2 official pool locations (Dinoyo Malang & Diponegoro Batu) with Google Maps deep links.
+ *
+ * @since 1.0.0
+ * @param array $atts User-defined shortcode attributes.
+ * @return string HTML rendered output.
+ */
+function ryokourent_pools_shortcode($atts = array()) {
+    wp_enqueue_style('ryokourent-public');
+
+    $parsed_atts = shortcode_atts(
+        array(
+            'section_id'  => 'lokasi-pool',
+            'title'       => __('Area Layanan & Dua Lokasi Pool Resmi', 'ryokourent'),
+            'subtitle'    => __('Titik strategis di Kota Malang dan Kota Wisata Batu untuk serah terima unit langsung atau pengantaran ke tempat menginap Anda.', 'ryokourent'),
+            'show_header' => 'yes',
+        ),
+        $atts,
+        'ryokou_pools'
+    );
+
+    $parsed_atts['show_header'] = ('no' !== $parsed_atts['show_header']);
+
+    if (function_exists('ryokourent_render_pool_locations_section')) {
+        return ryokourent_render_pool_locations_section($parsed_atts);
+    }
+
+    return '<div class="ryokou-notice">' . esc_html__('Modul lokasi pool Ryokourent belum dimuat.', 'ryokourent') . '</div>';
+}
+add_shortcode('ryokou_pools', 'ryokourent_pools_shortcode');
+
+/**
+ * Shortcode callback for [ryokou_bromo_advisory].
+ *
+ * Displays high-contrast advisory banner enforcing Trail CRF 150L for Mount Bromo caldera trips.
+ *
+ * @since 1.0.0
+ * @return string HTML rendered output.
+ */
+function ryokourent_bromo_advisory_shortcode() {
+    wp_enqueue_style('ryokourent-public');
+
+    if (function_exists('ryokourent_render_bromo_advisory_banner')) {
+        return ryokourent_render_bromo_advisory_banner();
+    }
+
+    return '';
+}
+add_shortcode('ryokou_bromo_advisory', 'ryokourent_bromo_advisory_shortcode');
+
+

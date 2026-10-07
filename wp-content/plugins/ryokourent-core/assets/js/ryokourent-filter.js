@@ -227,10 +227,77 @@
     updateCalculation();
   }
 
+  // 3. Interactive FAQ Accordion Handler (Zero jQuery, Accessible ARIA)
+  function initRyokouFaqAccordion() {
+    const triggers = document.querySelectorAll('.ryokou-accordion-trigger');
+    if (!triggers || triggers.length === 0) {
+      return;
+    }
+
+    triggers.forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+        const contentId = this.getAttribute('aria-controls');
+        const content = contentId ? document.getElementById(contentId) : null;
+        const icon = this.querySelector('.ryokou-accordion-icon');
+
+        // Close other sibling items for clean accordion UX
+        triggers.forEach(function (otherTrigger) {
+          if (otherTrigger !== trigger) {
+            otherTrigger.setAttribute('aria-expanded', 'false');
+            const otherContentId = otherTrigger.getAttribute('aria-controls');
+            const otherContent = otherContentId ? document.getElementById(otherContentId) : null;
+            if (otherContent) {
+              otherContent.hidden = true;
+            }
+            const otherIcon = otherTrigger.querySelector('.ryokou-accordion-icon');
+            if (otherIcon) {
+              otherIcon.textContent = '+';
+            }
+          }
+        });
+
+        // Toggle current item
+        if (isExpanded) {
+          this.setAttribute('aria-expanded', 'false');
+          if (content) {
+            content.hidden = true;
+          }
+          if (icon) {
+            icon.textContent = '+';
+          }
+        } else {
+          this.setAttribute('aria-expanded', 'true');
+          if (content) {
+            content.hidden = false;
+          }
+          if (icon) {
+            icon.textContent = '−';
+          }
+        }
+      });
+    });
+
+    // 4. Quick Trigger from Bromo Advisory Banner to Catalog Filter
+    const crfFilterTriggers = document.querySelectorAll('.ryokou-filter-trigger-crf');
+    crfFilterTriggers.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        const catalogSection = document.getElementById('katalog-motor');
+        if (!catalogSection) return;
+
+        const crfTab = catalogSection.querySelector('.ryokou-filter-btn[data-filter="trail-adventure"]');
+        if (crfTab) {
+          crfTab.click();
+        }
+      });
+    });
+  }
+
   // Initialize once DOM is ready
   function initAll() {
     initRyokouCatalog();
     initRyokouBookingForm();
+    initRyokouFaqAccordion();
   }
 
   if (document.readyState === 'loading') {

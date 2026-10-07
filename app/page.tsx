@@ -18,7 +18,9 @@ import {
   X,
   ExternalLink,
   ChevronRight,
-  Info
+  ChevronDown,
+  Info,
+  Navigation
 } from 'lucide-react';
 
 interface MotorUnit {
@@ -157,6 +159,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'beat-series' | 'scoopy-vario' | 'trail-adventure'>('all');
   const [activeModalMotor, setActiveModalMotor] = useState<MotorUnit | null>(null);
   const [showCodeInspector, setShowCodeInspector] = useState(false);
+  const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(0);
 
   // Booking Form State (TASK-011)
   const [tripDestination, setTripDestination] = useState<'malang_batu' | 'bromo'>('malang_batu');
@@ -1171,7 +1174,7 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
         )}
       </AnimatePresence>
 
-      {/* Locations Section */}
+      {/* Locations Section (TASK-025) */}
       <section id="lokasi-pool" className="py-16 sm:py-24 border-b border-[#223249]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -1182,91 +1185,205 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
               Dua Lokasi Pool Resmi di Malang & Batu
             </h2>
             <p className="text-slate-400 text-sm sm:text-base">
-              Lokasi strategis memudahkan pengambilan langsung atau titik awal pengantaran ke tempat menginap Anda.
+              Titik strategis di Kota Malang dan Kota Wisata Batu untuk serah terima unit langsung atau pengantaran ke tempat menginap Anda.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#162032] border border-[#223249] p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full">
-                  Pool 1 (Kota Malang)
-                </span>
-                <span className="text-xs text-slate-400">07.00 – 23.00 WIB</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Pool 1 */}
+            <div className="bg-[#162032] border border-[#223249] p-6 rounded-2xl flex flex-col justify-between hover:border-amber-500/40 transition-colors">
+              <div>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                      Pool 1 (Kota Malang)
+                    </span>
+                    <span className="text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                      Pusat Kota & Kampus
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> 07.00 – 23.00 WIB
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Pool Malang Dinoyo (Pusat Kota / Kampus)</h3>
+                <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed flex items-start gap-1.5">
+                  <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>Jl. MT Haryono Gg. 21 No. 23, Dinoyo, Lowokwaru, Kota Malang.</span>
+                </p>
+                <div className="bg-[#0b1120] border border-[#223249]/60 rounded-xl p-3 text-xs text-slate-400 space-y-1.5 mb-6">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">Keunggulan Akses:</span>
+                  <div>• Dekat kampus UB, UIN Maulana Malik Ibrahim, Polinema, Unisma, & UM.</div>
+                  <div>• Akses kilat ke koridor kuliner Soekarno-Hatta (Suhat) & pusat oleh-oleh khas Malang.</div>
+                  <div>• Titik temu pengantaran cepat ke Stasiun Malang Kota Baru & Stasiun Kota Lama.</div>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Pool Dinoyo - Lowokwaru</h3>
-              <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed">
-                Jl. MT Haryono Gg. 21 No. 23, Dinoyo, Lowokwaru, Malang.
-              </p>
-              <div className="text-xs text-slate-400 space-y-1 mb-4">
-                <div>• Akses mudah ke kawasan kampus UB, UIN, dan koridor kuliner Soekarno-Hatta.</div>
-                <div>• Titik jemput cepat ke Stasiun Malang Kota Baru & Stasiun Kota Lama.</div>
-              </div>
+              <a
+                href="https://maps.google.com/?q=Ryokourent+Dinoyo+Malang"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#0b1120] hover:bg-[#1e2c44] border border-[#223249] hover:border-amber-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition-all"
+              >
+                <Navigation className="w-3.5 h-3.5 text-amber-400" />
+                <span>Buka di Google Maps</span>
+              </a>
             </div>
 
-            <div className="bg-[#162032] border border-[#223249] p-6 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full">
-                  Pool 2 (Kota Wisata Batu)
-                </span>
-                <span className="text-xs text-slate-400">07.00 – 23.00 WIB</span>
+            {/* Pool 2 */}
+            <div className="bg-[#162032] border border-[#223249] p-6 rounded-2xl flex flex-col justify-between hover:border-amber-500/40 transition-colors">
+              <div>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                      Pool 2 (Kota Wisata Batu)
+                    </span>
+                    <span className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                      Kota Wisata Batu
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> 07.00 – 23.00 WIB
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Pool Batu Diponegoro (Kota Wisata Batu)</h3>
+                <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed flex items-start gap-1.5">
+                  <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>Jl. Belakang Pompa Bensin, Jl. Diponegoro No. 45, Sisir, Kec. Batu, Kota Wisata Batu.</span>
+                </p>
+                <div className="bg-[#0b1120] border border-[#223249]/60 rounded-xl p-3 text-xs text-slate-400 space-y-1.5 mb-6">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">Keunggulan Akses:</span>
+                  <div>• Berada tepat di jantung Kota Wisata Batu, dekat Alun-Alun Batu & Pasar Laron.</div>
+                  <div>• Akses langsung tanpa hambatan menuju Jatim Park 1-3, Museum Angkut, & BNS.</div>
+                  <div>• Titik awal nyaman untuk menjelajahi Selecta, Coban Rondo, paralayang, & Cangar.</div>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Pool Diponegoro - Batu</h3>
-              <p className="text-xs sm:text-sm text-slate-300 mb-4 leading-relaxed">
-                Jl. Belakang Pompa Bensin, Jl. Diponegoro, Kota Wisata Batu.
-              </p>
-              <div className="text-xs text-slate-400 space-y-1 mb-4">
-                <div>• Berada di jantung kota wisata Batu, dekat Alun-Alun Batu & Pasar Laron.</div>
-                <div>• Akses langsung menuju kawasan Jatim Park 1-3, Museum Angkut, & Selecta.</div>
-              </div>
+              <a
+                href="https://maps.google.com/?q=Ryokourent+Batu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#0b1120] hover:bg-[#1e2c44] border border-[#223249] hover:border-amber-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition-all"
+              >
+                <Navigation className="w-3.5 h-3.5 text-amber-400" />
+                <span>Buka di Google Maps</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Delivery Notice */}
+          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
+            <span className="text-2xl shrink-0">🛵</span>
+            <div className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              <strong className="text-emerald-400">Layanan Antar-Jemput Fleksibel Sesuai Situasi & Kondisi (Sikon):</strong>
+              <span> Selain ambil langsung di kedua Pool resmi di atas, unit dapat diantar ke Stasiun Malang Kota Baru atau penginapan (hotel/homestay/villa) Anda di Malang & Batu dengan konfirmasi admin terlebih dahulu.</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ & Requirements */}
+      {/* FAQ & Requirements Section (TASK-025 - 7 Official Items) */}
       <section id="syarat-faq" className="py-16 sm:py-24 bg-[#080d19]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-xs font-bold text-amber-400 tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full mb-3 inline-block">
-              Pertanyaan Umum
+              PANDUAN & FAQ RESMI
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-              Syarat Sewa & Pertanyaan Sering Diajukan
+              Syarat Sewa & Pertanyaan Sering Diajukan (FAQ)
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
-              Seluruh ketentuan dirancang transparan demi kenyamanan bersama.
+              Transparansi penuh demi keselamatan, keamanan armada, dan kenyamanan liburan Anda di Malang & Batu.
             </p>
           </div>
 
-          <div className="space-y-4">
+          {/* Documents Notice Banner */}
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 mb-8">
+            <span className="text-2xl shrink-0">📋</span>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-amber-400 mb-1">
+                Syarat Dokumen Jaminan Sewa (Wajib e-KTP + 2 Pendukung)
+              </h4>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Setiap penyewa wajib menunjukkan e-KTP Asli serta 2 dokumen identitas pendukung sah (SIM A, Paspor, BPJS/KIS, NPWP, KTM Mahasiswa, atau ID Karyawan). Verifikasi dilakukan privat via WhatsApp tanpa penyimpanan dokumen publik.
+              </p>
+            </div>
+          </div>
+
+          {/* Interactive 7-Item Accordion */}
+          <div className="space-y-3">
             {[
               {
-                q: 'Apa saja dokumen persyaratan sewa motor di Ryokourent?',
-                a: 'Penyewa wajib menunjukkan e-KTP Asli serta 2 dokumen identitas pendukung yang sah (misal: SIM A, Paspor, BPJS, NPWP, KTM Mahasiswa, atau ID Pegawai).'
+                id: 'dokumen',
+                q: 'Apa saja dokumen persyaratan untuk menyewa motor di Ryokourent?',
+                a: 'Penyewa wajib menunjukkan e-KTP Asli serta 2 (dua) dokumen identitas pendukung yang sah dan masih berlaku, seperti SIM A, Paspor, BPJS/KIS, NPWP, KTM Mahasiswa aktif (khusus mahasiswa Malang), atau ID Pegawai resmi. Foto dokumen dikirimkan langsung ke admin WhatsApp untuk verifikasi cepat tanpa perlu registrasi akun berbelit.'
               },
               {
-                q: 'Mengapa motor matik dilarang keras ke Lautan Pasir Bromo?',
-                a: 'Karakter medan pasir berbisik Bromo sangat berat dan panas. Transmisi skutik (CVT) rawan terbakar belt dan mengalami slip total di tengah lautan pasir. Untuk trip Bromo wajib menggunakan unit Trail CRF 150L.'
+                id: 'bromo-larangan',
+                q: 'Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo?',
+                a: 'Karakter medan pasir berbisik Gunung Bromo sangat berat, berdebu pekat, dan bertemperatur ekstrem. Transmisi otomatis skutik (CVT) rawan kemasukan debu vulkanik, overheat, belt selip, hingga terbakar di tengah lautan pasir. Demi keselamatan jiwa penyewa dan integritas mesin, seluruh motor matik dilarang keras memasuki kawasan kaldera pasir Bromo. Pelanggaran aturan ini dikenakan sanksi denda dan ganti rugi pemulihan mesin penuh.'
               },
               {
-                q: 'Apakah bisa diantar ke stasiun atau hotel?',
-                a: 'Bisa! Kami melayani antar-jemput unit ke Stasiun Malang Kota Baru atau penginapan di sekitar Malang dan Batu dengan konfirmasi jadwal operasional (07.00 – 23.00 WIB).'
+                id: 'bromo-crf',
+                q: 'Motor apa yang WAJIB digunakan jika ingin bepergian ke Gunung Bromo?',
+                a: 'Untuk perjalanan ke Gunung Bromo (Lautan Pasir, Pasir Berbisik, Savana Teletubbies, dan Penanjakan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban dual-purpose pacul berprofil tinggi, mesin bertenaga dengan ground clearance optimal yang tangguh dan aman melibas lautan pasir.'
               },
               {
-                q: 'Berapa batas toleransi keterlambatan pengembalian?',
-                a: 'Kami memberikan toleransi overtime hingga 2 jam dari jam serah terima. Keterlambatan melebihi toleransi akan dikenakan biaya overtime harian proporsional.'
+                id: 'antar-jemput',
+                q: 'Apakah motor bisa diantar ke stasiun atau tempat menginap (hotel/villa)?',
+                a: 'Bisa! Kami melayani serah terima langsung di 2 Pool resmi (Dinoyo Malang & Diponegoro Batu), serta layanan antar-jemput ke Stasiun Malang Kota Baru, Stasiun Malang Kota Lama, maupun hotel/homestay/villa di Malang Raya dan Kota Wisata Batu. Layanan pengantaran disesuaikan dengan situasi dan kondisi (sikon) tim lapangan pada jam operasional kami.'
+              },
+              {
+                id: 'jam-operasional',
+                q: 'Kapan jam operasional pelayanan dan serah terima armada?',
+                a: 'Jam pelayanan operasional Pool dan reservasi WhatsApp kami adalah pukul 07:00 – 23:00 WIB setiap hari. Serah terima unit, konfirmasi booking, dan pengembalian armada dilayani selama rentang jam tersebut.'
+              },
+              {
+                id: 'overtime',
+                q: 'Bagaimana aturan durasi sewa 24 jam dan batas toleransi pengembalian (overtime)?',
+                a: 'Hitungan sewa kami adalah full 24 jam per hari. Kami memberikan toleransi keterlambatan pengembalian (grace period) gratis hingga 2 jam dari jam serah terima. Apabila keterlambatan melebihi 2 jam tanpa konfirmasi perpanjangan sewa kepada admin, maka berlaku tarif keterlambatan per jam proporsional atau dihitung paket hari berikutnya.'
+              },
+              {
+                id: 'batas-wilayah',
+                q: 'Apakah motor boleh dibawa keluar wilayah Malang Raya dan Kota Batu?',
+                a: 'Area operasional standar sewa motor adalah wilayah Malang Raya (Kota Malang, Kabupaten Malang pantai selatan/utara) dan Kota Wisata Batu. Penggunaan armada keluar batas wilayah Malang Raya (misal: Surabaya, Kediri, Blitar, Probolinggo di luar rute resmi Bromo CRF) WAJIB memperoleh izin tertulis terlebih dahulu dari Admin Ryokourent sebelum keberangkatan.'
               }
-            ].map((faq, i) => (
-              <div key={i} className="bg-[#162032] border border-[#223249] p-5 rounded-xl">
-                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                  <span className="text-amber-400">Q:</span> {faq.q}
-                </h4>
-                <p className="text-xs text-slate-300 leading-relaxed pl-5 border-l border-amber-500/40">
-                  {faq.a}
-                </p>
-              </div>
-            ))}
+            ].map((faq, i) => {
+              const isOpen = activeFaqIndex === i;
+              return (
+                <div
+                  key={faq.id}
+                  className="bg-[#162032] border border-[#223249] rounded-xl overflow-hidden transition-colors hover:border-[#334868]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveFaqIndex(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 text-white font-semibold text-xs sm:text-sm hover:bg-[#1e2c44]/50 transition-colors"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold shrink-0 border border-amber-500/20">
+                        {i + 1}
+                      </span>
+                      <span>{faq.q}</span>
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-amber-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#223249]/40 bg-[#0b1120]/40"
+                    >
+                      <p>{faq.a}</p>
+                    </motion.div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

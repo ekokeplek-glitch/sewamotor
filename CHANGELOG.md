@@ -8,6 +8,44 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-07
 
 ### Added
+- **Fase 3 (TASK-025: Buat Halaman FAQ dan Lokasi Pool):**
+  - Implementasi fungsi katalog informasi pool dan FAQ blueprint di `public/templates.php`:
+    - `ryokourent_get_faq_items()`: 7 poin FAQ resmi blueprint (dokumen persyaratan e-KTP asli + 2 pendukung, larangan matik ke pasir Bromo karena overheat CVT & slip, kewajiban Trail CRF 150L, layanan antar-jemput fleksibel, jam operasional 07:00-23:00 WIB, overtime grace period 2 jam gratis, dan batas wilayah Malang-Batu).
+    - `ryokourent_get_pool_locations_data()`: 2 lokasi pool resmi (Pool 1 Dinoyo Malang & Pool 2 Diponegoro Batu) dengan sinkronisasi dinamis ke opsi pengaturan `ryokourent_get_settings()`.
+    - `ryokourent_render_faq_section()`: Komponen HTML FAQ dengan banner syarat dokumen e-KTP dan accordion interaktif berbasis semantik ARIA (`aria-expanded`, `aria-controls`).
+    - `ryokourent_render_pool_locations_section()`: Kartu informasi 2 pool dengan tombol navigasi Google Maps, status buka, dan catatan antar-jemput stasiun/hotel.
+    - `ryokourent_render_bromo_advisory_banner()`: Banner peringatan bahaya matik di lautan pasir Bromo dengan tombol filter cepat ke armada Trail CRF 150L.
+  - Pendaftaran shortcode baru di `public/shortcodes.php`:
+    - `[ryokou_faq]` (render FAQ accordion 7 poin).
+    - `[ryokou_pools]` (render informasi 2 lokasi pool resmi).
+    - `[ryokou_bromo_advisory]` (render banner edukasi wajib Bromo).
+  - Skrip interaktivitas Vanilla JS di `assets/js/ryokourent-filter.js`:
+    - Accordion toggle mulus dengan keyboard navigation accessibility dan single-active or multi-active state.
+    - Event listener untuk trigger CTA banner Bromo yang otomatis mengaktifkan filter katalog Trail Adventure.
+  - Penambahan styling CSS responsif mobile-first di `assets/css/ryokourent-public.css` dan `wp-content/themes/generatepress-child/style.css`.
+  - Pembuatan template halaman GeneratePress Child Theme:
+    - `wp-content/themes/generatepress-child/templates/template-faq-pool.php`
+    - `wp-content/themes/generatepress-child/template-faq-pool.php`
+  - Penambahan showcase interaktif di aplikasi Next.js `app/page.tsx`:
+    - Komponen accordion 7 poin FAQ blueprint dengan state aktif dan transisi chevron.
+    - Kartu pool lokasi Dinoyo dan Batu lengkap dengan tombol rute Google Maps dan badge keunggulan.
+  - Pembuatan unit test otomatis `tests/test-faq-pool.php` (54 skenario pengujian, seluruhnya PASS).
+
+- **Fase 3 (TASK-024: Pengaturan Harga dan Nomor WhatsApp / Admin Settings):**
+  - Pembuatan modul konfigurasi terpusat `includes/settings.php`:
+    - Pengambilan konfigurasi dengan fallback default (`ryokourent_get_default_settings()`, `ryokourent_get_settings()`, `ryokourent_get_operating_hours()`).
+    - Penyimpanan dan validasi ketat pengaturan umum: nomor WhatsApp utama (08xx/628xx), nomor WA cadangan, jam operasional (07:00-23:00 WIB), serta tautan peta Google Maps pool Dinoyo dan Batu.
+    - Implementasi algoritma penyesuaian harga aman `ryokourent_calculate_adjusted_price()` dan fungsi eksekusi massal `ryokourent_apply_bulk_price_adjustment()`.
+    - Penerapan batas keamanan ketat (ADR-012): persentase dibatasi $-50\%$ s/d $+200\%$, harga baru wajib $> \text{Rp } 0$, pembulatan seribu rupiah, dan validasi atomik *two-pass* (batal serempak jika ada satu motor menghasilkan harga $\le 0$).
+  - Pembuatan antarmuka admin `admin/admin-settings.php`:
+    - Pendaftaran submenu di bawah menu Penyewaan dan menu Armada Motor dengan hak akses eksklusif `manage_ryokourent_settings`.
+    - Penerapan penjaga akses server-side `ryokourent_check_settings_permission_or_die()` yang menolak Operator dengan respon HTTP 403 Forbidden.
+    - Antarmuka dual-tab: "Kontak WhatsApp & Jam Operasional" dan "Penyesuaian Tarif Massal (Peak Season)".
+    - Pratinjau tabel tarif armada saat ini untuk referensi admin.
+  - Penambahan helper `ryokourent_update_motor_pricing()` pada `includes/pricing.php`.
+  - Penambahan keputusan arsitektur ADR-012 di `DECISIONS.md`.
+  - Pembuatan automated unit test `tests/test-admin-settings.php` (44 pengujian, seluruhnya PASS).
+
 - **Fase 3 (TASK-023: Perubahan Status Booking, Quick Actions & Validasi Plat):**
   - Pembuatan quick action perubahan status booking di `admin/booking-columns.php`: kolom "Status & Aksi" dengan tombol aksi spesifik per status (Konfirmasi, Serah Terima/Berjalan, Selesai, Batalkan).
   - Proteksi keamanan berlapis pada quick action: nonce spesifik per booking (`ryokourent_status_<id>`), capability check `manage_ryokourent_bookings` (penolakan HTTP 403 Forbidden), dan whitelist status.

@@ -358,28 +358,38 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 
 ---
 
-### TASK-024: Buat Pengaturan Harga dan Nomor WhatsApp (Admin Settings)
+### TASK-024: Buat Pengaturan Harga dan Nomor WhatsApp (Admin Settings) [DONE]
+* **Status:** Selesai (DONE) - 2026-10-07. Automated unit test `tests/test-admin-settings.php` (44/44 pengujian PASS).
 * **Tujuan:** Membuat antarmuka pengaturan admin (`manage_ryokourent_settings`) untuk nomor WhatsApp admin resmi, teks default, jam operasional, dan fitur multi-update harga (bulk price adjustment nominal/persentase untuk peak season).
 * **File yang Dibuat/Diubah:**
-  * `wp-content/plugins/ryokourent-core/admin/admin-settings.php`
-  * `wp-content/plugins/ryokourent-core/includes/settings.php`
+  * `wp-content/plugins/ryokourent-core/admin/admin-settings.php` (baru)
+  * `wp-content/plugins/ryokourent-core/includes/settings.php` (baru)
   * `wp-content/plugins/ryokourent-core/includes/pricing.php`
+  * `wp-content/plugins/ryokourent-core/tests/test-admin-settings.php` (baru)
 * **Dependensi:** TASK-014, TASK-021.
-* **Kriteria Selesai:** Dilindungi nonce `check_admin_referer` dan capability `manage_ryokourent_settings`. Admin dapat mengubah nomor tujuan WhatsApp dan menerapkan penyesuaian harga bulk per kategori motor. Penyesuaian memiliki batas nilai angka (tidak boleh menghasilkan harga $\le 0$ atau persentase ekstrem $> 200\%$).
-* **Cara Pengujian:** Naikkan harga kategori BeAT +10.000 melalui bulk update, periksa perubahan harga pada katalog. Uji input angka negatif atau tidak valid; pastikan ditolak.
-* **Risiko:** Salah input formula persentase yang merusak data harga master jika tidak divalidasi batasnya.
+* **Kriteria Selesai:** Dilindungi nonce `check_admin_referer` (`ryokourent_save_settings_action` dan `ryokourent_bulk_price_action`) serta capability `manage_ryokourent_settings`. Operator (`manage_ryokourent_bookings` saja) ditolak secara server-side via guard `ryokourent_check_settings_permission_or_die()` (HTTP 403 Forbidden). Admin dapat mengubah nomor tujuan WhatsApp (divalidasi format seluler Indonesia), jam operasional pool (07:00 - 23:00 WIB), alamat 2 pool resmi, dan menerapkan penyesuaian harga massal (*bulk price adjustment*) per kategori motor atau seluruh armada. Penyesuaian harga memiliki batas nilai angka ketat (ADR-012: persentase dibatasi $-50\%$ s/d $+200\%$, harga baru tidak boleh $\le 0$, pembulatan seribu rupiah, dan validasi atomik *two-pass* yang membatalkan operasi jika ada satu unit yang menghasilkan harga tidak valid).
+* **Cara Pengujian:** Jalankan `php wp-content/plugins/ryokourent-core/tests/test-admin-settings.php` (44 pengujian mencakup otorisasi RBAC, penolakan 403 operator, validasi WA, jam operasional, penyesuaian nominal positif/negatif, penyesuaian persentase, penolakan persentase ekstrem, pembatalan two-pass jika ada harga $\le 0$, dan pendaftaran submenu).
+* **Risiko:** Salah input formula persentase yang merusak data harga master jika tidak divalidasi batasnya (termitigasi 100% oleh batasan rentang aman $-50\%$ s/d $+200\%$ dan simulasi two-pass fail-safe).
 
 ---
 
-### TASK-025: Buat Halaman FAQ dan Lokasi Pool
+### TASK-025: Buat Halaman FAQ dan Lokasi Pool [DONE]
+* **Status:** Selesai (DONE) - 2026-10-07
 * **Tujuan:** Membuat komponen informasi 2 Pool resmi (Dinoyo Malang & Diponegoro Batu), jam operasional (07.00 - 23.00), aturan ketat Bromo (Trail CRF 150L wajib), dan FAQ accordion 7 poin sesuai blueprint.
 * **File yang Dibuat/Diubah:**
   * `wp-content/plugins/ryokourent-core/public/templates.php`
-  * `wp-content/themes/generatepress-child/templates/`
-* **Dependensi:** TASK-007.
-* **Kriteria Selesai:** Halaman menyajikan alamat pool lengkap dengan tautan Google Maps, syarat dokumen e-KTP, dan accordion FAQ interaktif.
-* **Cara Pengujian:** Klik setiap item FAQ, uji tautan Google Maps Pool 1 dan Pool 2.
-* **Risiko:** Tampilan accordion rusak pada perangkat layar kecil.
+  * `wp-content/plugins/ryokourent-core/public/shortcodes.php`
+  * `wp-content/plugins/ryokourent-core/assets/js/ryokourent-filter.js`
+  * `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`
+  * `wp-content/themes/generatepress-child/templates/template-faq-pool.php`
+  * `wp-content/themes/generatepress-child/template-faq-pool.php`
+  * `wp-content/themes/generatepress-child/style.css`
+  * `wp-content/plugins/ryokourent-core/tests/test-faq-pool.php`
+  * `app/page.tsx`
+* **Dependensi:** TASK-007, TASK-024.
+* **Kriteria Selesai:** Halaman menyajikan alamat 2 pool lengkap dengan tautan Google Maps dinamis dari `ryokourent_get_settings()`, syarat dokumen e-KTP + 2 identitas pendukung, jam operasional resmi 07:00 - 23:00 WIB, banner aturan wajib Bromo (CRF 150L), dan accordion FAQ interaktif 7 poin blueprint tanpa horizontal overflow.
+* **Cara Pengujian:** Jalankan unit test `tests/test-faq-pool.php` (54 skenario pengujian komprehensif, mencakup 7 poin blueprint, 2 lokasi pool, fallback dinamis settings, ARIA accessibility, escaping XSS, 3 shortcode, integritas template GeneratePress child, dan trigger filter CRF).
+* **Risiko:** Tampilan accordion rusak pada perangkat layar kecil (termitigasi 100% oleh CSS flex/grid responsif mobile-first, ARIA button, CSS transform chevron, dan transisi max-height mulus).
 
 ---
 
