@@ -843,7 +843,7 @@ function ryokourent_get_status_transitions() {
     return array(
         'status_menunggu'     => array('status_dikonfirmasi', 'status_dibatalkan'),
         'status_dikonfirmasi' => array('status_berjalan', 'status_dibatalkan'),
-        'status_berjalan'     => array('status_selesai'),
+        'status_berjalan'     => array('status_selesai', 'status_dibatalkan'),
         'status_selesai'      => array(),
         'status_dibatalkan'   => array(),
     );
@@ -1039,4 +1039,247 @@ function ryokourent_transition_booking_status($booking_id, $new_status, $plate =
     }
 
     return $apply();
+}
+
+/**
+ * Mendapatkan informasi status overtime (keterlambatan pengembalian unit) untuk admin.
+ *
+ * Aturan Bisnis:
+ * - Overtime waktu (jam) TETAP dihitung karena terkait stok fisik unit yang masih di luar
+ *   dan notifikasi penting ke dashboard/daftar booking admin.
+ * - Denda TIDAK dihitung otomatis (denda_auto = 0), melainkan ditentukan secara manual oleh admin.
+ *
+ * @since 1.0.0
+ * @param int $booking_id ID booking CPT 'penyewaan'.
+ * @return array{is_overdue:bool,overdue_hours:float,label:string,auto_fine:int}
+ */
+function ryokourent_get_booking_overtime_info($booking_id) {
+    $booking_id = absint($booking_id);
+    if ($booking_id <= 0 || 'status_berjalan' !== get_post_status($booking_id)) {
+        return array(
+            'is_overdue'    => false,
+            'overdue_hours' => 0.0,
+            'label'         => '',
+            'auto_fine'     => 0,
+        );
+    }
+
+    $end_raw = (string) get_post_meta($booking_id, '_ryokou_booking_end_datetime', true);
+    if (empty($end_raw)) {
+        return array(
+            'is_overdue'    => false,
+            'overdue_hours' => 0.0,
+            'label'         => '',
+            'auto_fine'     => 0,
+        );
+    }
+
+    $tz = function_exists('ryokourent_get_timezone') ? ryokourent_get_timezone() : new DateTimeZone('Asia/Jakarta');
+
+    try {
+        $end_dt = new DateTime($end_raw, $tz);
+        $now_dt = new DateTime('now', $tz);
+
+        if ($now_dt > $end_dt) {
+            $diff_seconds = $now_dt->getTimestamp() - $end_dt->getTimestamp();
+            $hours = round($diff_seconds / 3600, 1);
+
+            return array(
+                'is_overdue'    => true,
+                'overdue_hours' => $hours,
+                'label'         => sprintf(__('Terlambat +%s Jam', 'ryokourent'), number_format($hours, 1, ',', '.')),
+                'auto_fine'     => 0, // Denda tidak dihitung otomatis, dihitung manual oleh admin
+            );
+        }
+    } catch (Exception $e) {
+        // Fallback jika format tanggal tidak valid
+    }
+
+    return array(
+        'is_overdue'    => false,
+        'overdue_hours' => 0.0,
+        'label'         => '',
+        'auto_fine'     => 0,
+    );
+}
+
+/**
+ * Perpanjang durasi masa sewa (Extend Rental) oleh Admin.
+ *
+ * Aturan Bisnis:
+ * - Default perpanjangan: +1 Hari (24 Jam), dengan opsi pilihan jumlah hari ($extra_days).
+ * - Jika admin memilih opsi perpanjangan saat overtime, maka waktu keterlambatan tersebut
+ *   menjadi akumulasi perpanjangan sewa resmi (bukan overtime lagi).
+ * - Jadwal selesai sewa (end_datetime) dimajukan kelipatan 24 jam.
+ * - Total hari dan total biaya sewa diakumulasikan.
+ * - Kuota ketersediaan diverifikasi dengan lock untuk mencegah bentrok jadwal berikutnya.
+ *
+ * @since 1.0.0
+ * @param int    $booking_id  ID booking CPT 'penyewaan'.
+ * @param int    $extra_days  Jumlah hari perpanjangan (kelipatan 24 jam). Default 1.
+ * @param string $admin_notes Catatan tambahan opsional.
+ * @return array Hasil standar: success, code, message, new_end, total_price.
+ */
+function ryokourent_extend_rental_duration($booking_id, $extra_days = 1, $admin_notes = '') {
+    $booking_id = absint($booking_id);
+    $extra_days = max(1, absint($extra_days));
+
+    if ($booking_id <= 0 || 'penyewaan' !== get_post_type($booking_id)) {
+        return array(
+            'success' => false,
+            'code'    => 'invalid_booking',
+            'message' => __('Data pemesanan tidak valid.', 'ryokourent'),
+        );
+    }
+
+    $current_status = get_post_status($booking_id);
+    if (!in_array($current_status, array('status_berjalan', 'status_dikonfirmasi'), true)) {
+        return array(
+            'success' => false,
+            'code'    => 'invalid_status_for_extension',
+            'message' => __('Perpanjangan sewa hanya dapat dilakukan untuk pesanan yang sedang berjalan atau sudah dikonfirmasi.', 'ryokourent'),
+        );
+    }
+
+    $motor_id  = absint(get_post_meta($booking_id, '_ryokou_booking_motor_id', true));
+    $start_raw = (string) get_post_meta($booking_id, '_ryokou_booking_start_datetime', true);
+    $old_end   = (string) get_post_meta($booking_id, '_ryokou_booking_end_datetime', true);
+
+    if ($motor_id <= 0 || empty($start_raw) || empty($old_end)) {
+        return array(
+            'success' => false,
+            'code'    => 'incomplete_booking_meta',
+            'message' => __('Data jadwal pemesanan tidak lengkap untuk perpanjangan.', 'ryokourent'),
+        );
+    }
+
+    $tz = function_exists('ryokourent_get_timezone') ? ryokourent_get_timezone() : new DateTimeZone('Asia/Jakarta');
+
+    try {
+        $old_end_dt = new DateTime($old_end, $tz);
+        $new_end_dt = clone $old_end_dt;
+        $new_end_dt->modify('+' . $extra_days . ' days'); // Kelipatan 24 jam per hari
+        $new_end_str = $new_end_dt->format('Y-m-d H:i');
+    } catch (Exception $e) {
+        return array(
+            'success' => false,
+            'code'    => 'datetime_parse_error',
+            'message' => __('Format tanggal sewa tidak valid.', 'ryokourent'),
+        );
+    }
+
+    $extend_logic = function () use ($booking_id, $motor_id, $start_raw, $old_end, $new_end_str, $extra_days, $admin_notes) {
+        // Cek ketersediaan unit untuk jadwal sewa yang baru diperpanjang
+        if (function_exists('ryokourent_check_availability')) {
+            $is_available = ryokourent_check_availability($motor_id, $start_raw, $new_end_str, $booking_id);
+            if (!$is_available) {
+                return array(
+                    'success' => false,
+                    'code'    => 'unit_conflict',
+                    'message' => sprintf(__('Gagal memperpanjang sewa: Unit motor ini telah memiliki reservasi lain yang terkonfirmasi setelah jadwal %s.', 'ryokourent'), $old_end),
+                );
+            }
+        }
+
+        // Ambil data tarif motor
+        $rates = function_exists('ryokourent_get_motor_pricing') ? ryokourent_get_motor_pricing($motor_id) : array('daily' => 0);
+        $daily_rate = isset($rates['daily']) ? (int) $rates['daily'] : 0;
+
+        $old_total_days = absint(get_post_meta($booking_id, '_ryokou_booking_total_days', true));
+        $new_total_days = max(1, $old_total_days + $extra_days);
+
+        $old_hours = (float) get_post_meta($booking_id, '_ryokou_booking_duration_hours', true);
+        $new_hours = $old_hours + ($extra_days * 24.0);
+
+        $old_price = (int) get_post_meta($booking_id, '_ryokou_booking_total_price', true);
+
+        // Hitung ulang tarif optimal atau tambahkan tarif harian
+        if (function_exists('ryokourent_calculate_optimal_rental_price') && $daily_rate > 0) {
+            $weekly_rate  = isset($rates['weekly']) ? (int) $rates['weekly'] : 0;
+            $monthly_rate = isset($rates['monthly']) ? (int) $rates['monthly'] : 0;
+            $optimal = ryokourent_calculate_optimal_rental_price($new_total_days, $daily_rate, $weekly_rate, $monthly_rate);
+            $new_price = $optimal['total_price'];
+        } else {
+            $new_price = $old_price + ($daily_rate * $extra_days);
+        }
+
+        // Simpan perubahan ke post meta
+        update_post_meta($booking_id, '_ryokou_booking_end_datetime', $new_end_str);
+        update_post_meta($booking_id, '_ryokou_booking_total_days', $new_total_days);
+        update_post_meta($booking_id, '_ryokou_booking_duration_hours', $new_hours);
+        update_post_meta($booking_id, '_ryokou_booking_duration_label', sprintf(__('%d Hari (~%s Jam)', 'ryokourent'), $new_total_days, number_format($new_hours, 0)));
+        update_post_meta($booking_id, '_ryokou_booking_total_price', $new_price);
+
+        // Catat riwayat perpanjangan sewa
+        $now_wib = function_exists('ryokourent_get_now_wib') ? ryokourent_get_now_wib() : gmdate('Y-m-d H:i:s');
+        $history = get_post_meta($booking_id, '_ryokou_extension_history', true);
+        if (!is_array($history)) {
+            $history = array();
+        }
+        $history[] = array(
+            'extended_at' => $now_wib,
+            'extra_days'  => $extra_days,
+            'old_end'     => $old_end,
+            'new_end'     => $new_end_str,
+            'notes'       => sanitize_text_field($admin_notes),
+            'admin_user'  => function_exists('get_current_user_id') ? get_current_user_id() : 0,
+        );
+        update_post_meta($booking_id, '_ryokou_extension_history', $history);
+
+        return array(
+            'success'     => true,
+            'code'        => 'rental_extended',
+            'message'     => sprintf(__('Sewa berhasil diperpanjang +%d Hari (24 Jam) hingga %s. Waktu tersebut terakumulasi sebagai sewa resmi.', 'ryokourent'), $extra_days, $new_end_str),
+            'new_end'     => $new_end_str,
+            'total_days'  => $new_total_days,
+            'total_price' => $new_price,
+        );
+    };
+
+    if (function_exists('ryokourent_with_motor_lock')) {
+        return ryokourent_with_motor_lock($motor_id, $extend_logic);
+    }
+
+    return call_user_func($extend_logic);
+}
+
+/**
+ * Batalkan pemesanan sewa oleh Admin dengan catatan alasan pembatalan.
+ *
+ * Aturan Bisnis:
+ * - Pembatalan dilakukan oleh Admin via tombol "Cancel Booking".
+ * - Menyediakan kolom catatan alasan pembatalan opsional.
+ * - Mengubah status menjadi 'status_dibatalkan' dan membebaskan alokasi stok unit seketika.
+ *
+ * @since 1.0.0
+ * @param int    $booking_id          ID booking CPT 'penyewaan'.
+ * @param string $cancellation_reason Alasan pembatalan (opsional).
+ * @return array Hasil standar status.
+ */
+function ryokourent_cancel_booking($booking_id, $cancellation_reason = '') {
+    $booking_id = absint($booking_id);
+    if ($booking_id <= 0 || 'penyewaan' !== get_post_type($booking_id)) {
+        return array(
+            'success' => false,
+            'code'    => 'invalid_booking',
+            'message' => __('Data pemesanan tidak valid.', 'ryokourent'),
+        );
+    }
+
+    $now_wib = function_exists('ryokourent_get_now_wib') ? ryokourent_get_now_wib() : gmdate('Y-m-d H:i:s');
+    $reason  = sanitize_text_field(wp_unslash($cancellation_reason));
+
+    if (!empty($reason)) {
+        update_post_meta($booking_id, '_ryokou_cancellation_reason', $reason);
+    }
+    update_post_meta($booking_id, '_ryokou_cancelled_at', $now_wib);
+
+    // Ubah status ke status_dibatalkan
+    $result = ryokourent_transition_booking_status($booking_id, 'status_dibatalkan');
+
+    if ($result['success']) {
+        $result['message'] = __('Pemesanan berhasil dibatalkan. Kuota unit motor telah dikembalikan ke sistem.', 'ryokourent');
+    }
+
+    return $result;
 }

@@ -180,7 +180,7 @@ export default function HomePage() {
     return motor.category === selectedCategory;
   });
 
-  // Handle route change: Bromo locks selection to Trail CRF 150L
+  // Handle route change: Extreme routes lock selection to Trail CRF 150L
   const handleDestinationChange = (dest: 'malang_batu' | 'bromo') => {
     setTripDestination(dest);
     if (dest === 'bromo') {
@@ -728,13 +728,13 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
                         : 'bg-[#0b1120] border-[#223249] hover:border-slate-600'
                     }`}
                   >
-                    <span className="text-2xl">🌋</span>
+                    <span className="text-2xl">⛰️</span>
                     <div>
                       <strong className="text-xs sm:text-sm text-white block mb-0.5">
-                        Trip Kaldera Bromo (Wajib CRF)
+                        Jalur Ekstrem: Bromo, Cangar, Pantai (Wajib Trail CRF)
                       </strong>
                       <span className="text-[11px] text-amber-400/90 leading-tight block font-medium">
-                        Unit otomatis dikunci ke Trail CRF 150L.
+                        Wajib Trail CRF 150L. Matik dilarang demi keselamatan rem & mesin.
                       </span>
                     </div>
                   </button>
@@ -1318,13 +1318,13 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
               },
               {
                 id: 'bromo-larangan',
-                q: 'Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo?',
-                a: 'Karakter medan pasir berbisik Gunung Bromo sangat berat, berdebu pekat, dan bertemperatur ekstrem. Transmisi otomatis skutik (CVT) rawan kemasukan debu vulkanik, overheat, belt selip, hingga terbakar di tengah lautan pasir. Demi keselamatan jiwa penyewa dan integritas mesin, seluruh motor matik dilarang keras memasuki kawasan kaldera pasir Bromo. Pelanggaran aturan ini dikenakan sanksi denda dan ganti rugi pemulihan mesin penuh.'
+                q: 'Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo, Jalur Cangar, dan Pantai Pasir?',
+                a: 'Jalur ekstrem seperti lautan pasir Bromo, tanjakan/turunan curam Cangar (rawan rem blong pada matik), dan medan pantai pasir berisiko tinggi bagi keselamatan. Transmisi otomatis skutik (CVT) rawan kemasukan pasir/debu vulkanik, overheat, belt selip, serta tidak memiliki engine brake memadai di turunan curam. Demi keselamatan jiwa dan keutuhan mesin, seluruh motor matik dilarang keras melintasi rute tersebut.'
               },
               {
                 id: 'bromo-crf',
-                q: 'Motor apa yang WAJIB digunakan jika ingin bepergian ke Gunung Bromo?',
-                a: 'Untuk perjalanan ke Gunung Bromo (Lautan Pasir, Pasir Berbisik, Savana Teletubbies, dan Penanjakan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban dual-purpose pacul berprofil tinggi, mesin bertenaga dengan ground clearance optimal yang tangguh dan aman melibas lautan pasir.'
+                q: 'Motor apa yang WAJIB digunakan jika ingin ke Bromo, Jalur Cangar, atau Pantai Pasir?',
+                a: 'Untuk perjalanan ke jalur ekstrem (Gunung Bromo, tanjakan/turunan Cangar, dan kawasan pantai pasir Malang Selatan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban pacul dual-purpose, mesin bertenaga dengan ground clearance tinggi, serta engine brake manual yang aman untuk tanjakan dan turunan ekstrem.'
               },
               {
                 id: 'antar-jemput',
@@ -1338,8 +1338,8 @@ Mohon konfirmasi ketersediaan slot armada dan instruksi pembayaran jaminan. Teri
               },
               {
                 id: 'overtime',
-                q: 'Bagaimana aturan durasi sewa 24 jam dan batas toleransi pengembalian (overtime)?',
-                a: 'Hitungan sewa kami adalah full 24 jam per hari. Kami memberikan toleransi keterlambatan pengembalian (grace period) gratis hingga 2 jam dari jam serah terima. Apabila keterlambatan melebihi 2 jam tanpa konfirmasi perpanjangan sewa kepada admin, maka berlaku tarif keterlambatan per jam proporsional atau dihitung paket hari berikutnya.'
+                q: 'Bagaimana aturan durasi sewa 24 jam, keterlambatan (overtime), dan pembatalan booking?',
+                a: 'Durasi sewa dikunci dalam kelipatan 24 jam per hari. Apabila terjadi kendala keterlambatan pengembalian unit atau kebutuhan perpanjangan sewa, pelanggan wajib menghubungi admin via WhatsApp secepatnya. Denda keterlambatan tidak dihitung otomatis oleh web melainkan ditangani secara manual oleh admin lapangan, atau dapat langsung dialihkan menjadi akumulasi perpanjangan sewa resmi (+24 jam). Pembatalan booking juga dilakukan secara manual melalui komunikasi WhatsApp dengan admin.'
               },
               {
                 id: 'batas-wilayah',

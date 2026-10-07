@@ -507,13 +507,13 @@ function ryokourent_get_faq_items() {
         ),
         array(
             'id'       => 'faq-bromo-larangan',
-            'question' => __('Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo?', 'ryokourent'),
-            'answer'   => __('Karakter medan pasir berbisik Gunung Bromo sangat berat, berdebu pekat, dan bertemperatur ekstrem. Transmisi otomatis skutik (CVT) rawan kemasukan debu vulkanik, overheat, belt selip, hingga terbakar di tengah lautan pasir. Demi keselamatan jiwa penyewa dan integritas mesin, seluruh motor matik dilarang keras memasuki kawasan kaldera pasir Bromo. Pelanggaran aturan ini dikenakan sanksi denda dan ganti rugi pemulihan mesin penuh.', 'ryokourent'),
+            'question' => __('Mengapa seluruh unit matik DILARANG KERAS ke Lautan Pasir Bromo, Jalur Cangar, dan Pantai Pasir?', 'ryokourent'),
+            'answer'   => __('Jalur ekstrem seperti lautan pasir Bromo, tanjakan/turunan curam Cangar (rawan rem blong pada matik), dan medan pantai pasir berisiko tinggi bagi keselamatan. Transmisi otomatis matik (CVT) rawan kemasukan debu vulkanik/pasir, overheat, belt selip, serta tidak memiliki engine brake memadai di turunan curam. Demi keselamatan jiwa dan keutuhan armada, seluruh motor matik dilarang keras melintasi rute tersebut.', 'ryokourent'),
         ),
         array(
             'id'       => 'faq-bromo-crf',
-            'question' => __('Motor apa yang WAJIB digunakan jika ingin bepergian ke Gunung Bromo?', 'ryokourent'),
-            'answer'   => __('Untuk perjalanan ke Gunung Bromo (Lautan Pasir, Pasir Berbisik, Savana Teletubbies, dan Penanjakan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban dual-purpose pacul berprofil tinggi, mesin bertenaga dengan ground clearance optimal yang tangguh dan aman melibas lautan pasir.', 'ryokourent'),
+            'question' => __('Motor apa yang WAJIB digunakan jika ingin ke Bromo, Jalur Cangar, atau Pantai Pasir?', 'ryokourent'),
+            'answer'   => __('Untuk perjalanan ke jalur ekstrem (Gunung Bromo, tanjakan/turunan Cangar, dan kawasan pantai pasir Malang Selatan), penyewa WAJIB menyewa unit Honda Trail CRF 150L. Unit ini telah dilengkapi suspensi Showa inverted front fork (upside-down), ban pacul dual-purpose, mesin bertenaga dengan ground clearance tinggi, serta engine brake manual yang aman untuk tanjakan dan turunan ekstrem.', 'ryokourent'),
         ),
         array(
             'id'       => 'faq-antar-jemput',
@@ -537,8 +537,8 @@ function ryokourent_get_faq_items() {
         ),
         array(
             'id'       => 'faq-overtime',
-            'question' => __('Bagaimana aturan durasi sewa 24 jam dan batas toleransi pengembalian (overtime)?', 'ryokourent'),
-            'answer'   => __('Hitungan sewa kami adalah full 24 jam per hari. Kami memberikan toleransi keterlambatan pengembalian (grace period) gratis hingga 2 jam dari jam serah terima. Apabila keterlambatan melebihi 2 jam tanpa konfirmasi perpanjangan sewa kepada admin, maka berlaku tarif keterlambatan per jam proporsional atau dihitung paket hari berikutnya.', 'ryokourent'),
+            'question' => __('Bagaimana aturan durasi sewa 24 jam, keterlambatan (overtime), dan pembatalan booking?', 'ryokourent'),
+            'answer'   => __('Durasi sewa dikunci dalam kelipatan 24 jam per hari. Apabila terjadi kendala keterlambatan pengembalian unit atau kebutuhan perpanjangan sewa, pelanggan wajib menghubungi admin via WhatsApp secepatnya. Denda keterlambatan tidak dihitung otomatis oleh web melainkan ditangani secara manual oleh admin lapangan, atau dapat langsung dialihkan menjadi akumulasi perpanjangan sewa resmi (+24 jam). Pembatalan booking juga dilakukan secara manual melalui komunikasi WhatsApp dengan admin.', 'ryokourent'),
         ),
         array(
             'id'       => 'faq-batas-wilayah',
@@ -765,20 +765,20 @@ function ryokourent_render_pool_locations_section($args = array()) {
 function ryokourent_render_bromo_advisory_banner() {
     ob_start();
     ?>
-    <aside class="ryokou-bromo-advisory-banner" role="alert" aria-label="<?php esc_attr_e('Peringatan Keselamatan Trip Bromo', 'ryokourent'); ?>">
+    <aside class="ryokou-bromo-advisory-banner" role="alert" aria-label="<?php esc_attr_e('Peringatan Keselamatan Jalur Ekstrem Bromo, Cangar, dan Pantai Pasir', 'ryokourent'); ?>">
         <div class="ryokou-bromo-advisory-inner">
-            <div class="ryokou-bromo-advisory-icon" aria-hidden="true">🌋</div>
+            <div class="ryokou-bromo-advisory-icon" aria-hidden="true">⛰️</div>
             <div class="ryokou-bromo-advisory-content">
-                <div class="ryokou-bromo-advisory-badge"><?php esc_html_e('ATURAN WAJIB TRIP BROMO', 'ryokourent'); ?></div>
+                <div class="ryokou-bromo-advisory-badge"><?php esc_html_e('ATURAN WAJIB JALUR EKSTREM & OFF-ROAD', 'ryokourent'); ?></div>
                 <h3 class="ryokou-bromo-advisory-title">
-                    <?php esc_html_e('Unit Matik Dilarang ke Lautan Pasir Bromo — Wajib Honda Trail CRF 150L', 'ryokourent'); ?>
+                    <?php esc_html_e('Jalur Ekstrem Bromo, Cangar, & Pantai Pasir Wajib Honda Trail CRF 150L — Unit Matik Dilarang Keras!', 'ryokourent'); ?>
                 </h3>
                 <p class="ryokou-bromo-advisory-desc">
-                    <?php esc_html_e('Demi keselamatan jiwa dan mencegah kerusakan fatal transmisi CVT akibat debu vulkanik dan pasir hisap, seluruh unit motor matik (BeAT, Scoopy, Vario) DILARANG KERAS melintasi Kaldera Lautan Pasir Bromo. Trip ke Bromo WAJIB menyewa Honda Trail CRF 150L dengan suspensi upside-down Showa dan ban pacul dual-purpose.', 'ryokourent'); ?>
+                    <?php esc_html_e('Demi keselamatan jiwa dan mencegah risiko rem blong serta kerusakan transmisi, seluruh unit motor matik (BeAT, Scoopy, Vario, PCX) DILARANG KERAS melintasi jalur ekstrem naik-turun curam atau off-road: Lautan Pasir Gunung Bromo, tanjakan/turunan terjal Cangar, dan pantai pasir Malang Selatan. Rute-rute tersebut WAJIB menggunakan Honda Trail CRF 150L dengan suspensi upside-down Showa dan ban pacul dual-purpose.', 'ryokourent'); ?>
                 </p>
                 <div class="ryokou-bromo-advisory-actions">
                     <a href="#katalog-motor" class="ryokou-btn ryokou-btn-amber-sm ryokou-filter-trigger-crf" data-filter="trail-adventure">
-                        <span><?php esc_html_e('Lihat Unit Trail CRF 150L Bromo Ready', 'ryokourent'); ?></span> &rarr;
+                        <span><?php esc_html_e('Lihat Unit Trail CRF 150L Siap Jalur Ekstrem', 'ryokourent'); ?></span> &rarr;
                     </a>
                 </div>
             </div>

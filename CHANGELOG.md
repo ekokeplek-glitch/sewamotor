@@ -8,6 +8,28 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-07
 
 ### Added
+- **Pembaruan Aturan Bisnis & Kontrol Operasional Admin (Refinement & Operational Rules):**
+  - **Hak Akses Operator (Role & Capabilities):**
+    - Pembaruan izin di `includes/meta-boxes.php` dan `includes/user-roles.php`: Operator kini diizinkan mengedit armada eksisting, menambah/mengubah jumlah unit fisik (`_ryokou_physical_stock`) dan daftar plat nomor (`_ryokou_plate_numbers`), serta mengganti tarif sewa harian/mingguan/bulanan (`_ryokou_price_*`).
+    - Operator tetap dilarang keras menghapus unit motor (`delete_motors` dicabut) dan dilarang menambah/mengedit/menghapus kategori motor (taxonomy `kategori_motor` tetap eksklusif Administrator dengan cap `manage_ryokourent_settings`).
+  - **Durasi Sewa & Opsi Perpanjangan Sewa (Extend Rental):**
+    - Durasi sewa dikunci kelipatan 24 jam.
+    - Fungsi `ryokourent_extend_rental_duration($booking_id, $extra_days, $notes)` di `includes/booking.php`: Memperpanjang masa sewa kelipatan 24 jam (default +1 hari dengan opsi pilihan hari) dengan pengecekan lock ketersediaan kuota.
+    - Waktu keterlambatan (overtime) saat diperpanjang dialihkan menjadi akumulasi masa sewa resmi (bukan overtime lagi), jadwal sewa diperpanjang, dan biaya sewa diakumulasikan resmi.
+  - **Fitur Pembatalan Pesanan oleh Admin (Cancel Booking):**
+    - Fungsi `ryokourent_cancel_booking($booking_id, $reason)` di `includes/booking.php`: Pembatalan dilakukan oleh Admin via tombol "Cancel Booking" di panel admin, disertai input opsional catatan alasan pembatalan (`_ryokou_cancellation_reason`).
+    - Kuota unit motor segera dikembalikan ke pool saat pembatalan diproses.
+    - Fitur pembatalan mandiri di web dihilangkan (diarahkan melalui WhatsApp).
+  - **Pelacakan Overtime & Denda Manual:**
+    - Fungsi `ryokourent_get_booking_overtime_info($booking_id)`: Overtime jam tetap dihitung untuk pelacakan fisik ketersediaan unit dan memunculkan badge peringatan keterlambatan `[Overtime: +X Jam]` di admin list table.
+    - Denda TIDAK dihitung otomatis oleh web/sistem (denda manual dihitung oleh admin sesuai kondisi lapangan).
+  - **Aturan Rute Ekstrem Wajib Trail Honda CRF 150L:**
+    - Perluasan aturan rute ekstrem tidak hanya untuk Bromo, tetapi juga jalur curam naik-turun atau off-road seperti Jalur Cangar dan Pantai Pasir Malang Selatan.
+    - Seluruh motor matik (BeAT, Scoopy, Vario, PCX) dilarang keras demi keamanan rem & transmisi, wajib menggunakan Trail CRF 150L.
+    - Pembaruan banner advisory dan FAQ di `public/templates.php`, metabox CPT motor, dan `app/page.tsx`.
+  - **Automated Unit Test Suite:**
+    - Pembuatan `tests/test-business-rules.php` (26 skenario pengujian unit lolos verifikasi).
+
 - **Fase 4 (TASK-026: Buat Responsive Design & Mobile-First Optimization):**
   - Implementasi komponen Floating Mobile Action Bar di `public/templates.php`:
     - Fungsi `ryokourent_render_floating_mobile_bar()`: Bar bawah mengambang yang responsif dengan status jam operasional (07:00 - 23:00 WIB), indikator animasi pulse dot, tombol akses cepat formulir booking, dan tautan langsung WhatsApp admin.

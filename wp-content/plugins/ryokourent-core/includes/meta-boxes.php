@@ -105,16 +105,16 @@ function ryokourent_render_motor_specs_metabox($post) {
 
             <tr>
                 <th scope="row">
-                    <label for="ryokou_is_bromo_ready"><?php esc_html_e('Kelayakan Rute Bromo', 'ryokourent'); ?></label>
+                    <label for="ryokou_is_bromo_ready"><?php esc_html_e('Kelayakan Rute Ekstrem (Bromo / Cangar / Pantai)', 'ryokourent'); ?></label>
                 </th>
                 <td>
                     <label>
                         <input type="checkbox" id="ryokou_is_bromo_ready" name="_ryokou_is_bromo_ready" value="1" <?php checked($is_bromo_ready, true); ?> />
-                        <strong><?php esc_html_e('Unit Siap & Diizinkan untuk Trip Bromo (Wajib Trail CRF)', 'ryokourent'); ?></strong>
+                        <strong><?php esc_html_e('Unit Siap & Diizinkan untuk Rute Ekstrem (Wajib Trail CRF 150L)', 'ryokourent'); ?></strong>
                     </label>
                     <p class="description" style="color: #b45309; margin-top: 4px;">
                         <span class="dashicons dashicons-warning" style="vertical-align: middle; font-size: 16px;"></span>
-                        <?php esc_html_e('PERINGATAN: Centang opsi ini HANYA untuk motor Honda Trail CRF 150L. Seluruh motor matik dilarang keras untuk trip lautan pasir Gunung Bromo demi keselamatan penyewa.', 'ryokourent'); ?>
+                        <?php esc_html_e('PERINGATAN: Centang opsi ini HANYA untuk motor Honda Trail CRF 150L. Seluruh motor matik dilarang keras untuk rute ekstrem naik-turun curam atau off-road (Bromo lautan pasir, tanjakan Cangar, & pantai pasir Malang Selatan) demi keselamatan penyewa.', 'ryokourent'); ?>
                     </p>
                 </td>
             </tr>
@@ -149,16 +149,17 @@ function ryokourent_render_motor_pricing_metabox($post) {
     $price_weekly  = get_post_meta($post->ID, '_ryokou_price_weekly', true);
     $price_monthly = get_post_meta($post->ID, '_ryokou_price_monthly', true);
 
-    $can_edit_pricing = current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
+    // Operator and Administrator are both allowed to edit pricing
+    $can_edit_pricing = current_user_can('edit_post', $post->ID) || current_user_can('edit_motors') || current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
     $disabled_attr    = $can_edit_pricing ? '' : 'disabled="disabled"';
     ?>
     <p class="description" style="margin-bottom: 12px;">
-        <?php esc_html_e('Masukkan tarif dalam satuan angka Rupiah penuh (tanpa titik atau koma). Sistem kalkulator booking otomatis menghitung paket harian, mingguan, atau bulanan termurah.', 'ryokourent'); ?>
+        <?php esc_html_e('Masukkan tarif dalam satuan angka Rupiah penuh (tanpa titik atau koma). Operator dan Administrator dapat mengubah tarif sewa armada ini.', 'ryokourent'); ?>
     </p>
 
     <?php if (!$can_edit_pricing) : ?>
         <div class="notice notice-warning inline" style="margin: 0 0 15px 0;">
-            <p><?php esc_html_e('Anda hanya memiliki izin sebagai Operator. Pengubahan tarif sewa memerlukan kapabilitas Administrator.', 'ryokourent'); ?></p>
+            <p><?php esc_html_e('Anda tidak memiliki izin untuk mengedit tarif sewa motor ini.', 'ryokourent'); ?></p>
         </div>
     <?php endif; ?>
 
@@ -218,7 +219,8 @@ function ryokourent_render_motor_stock_metabox($post) {
     $physical_stock = get_post_meta($post->ID, '_ryokou_physical_stock', true);
     $plate_numbers  = get_post_meta($post->ID, '_ryokou_plate_numbers', true);
 
-    $can_edit_stock = current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
+    // Operator and Administrator are both allowed to edit stock & plate numbers
+    $can_edit_stock = current_user_can('edit_post', $post->ID) || current_user_can('edit_motors') || current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
     $disabled_attr  = $can_edit_stock ? '' : 'disabled="disabled"';
     ?>
     <p style="margin-top: 0; font-size: 12px; color: #64748b;">
@@ -229,7 +231,7 @@ function ryokourent_render_motor_stock_metabox($post) {
     <p>
         <label for="ryokou_physical_stock"><strong><?php esc_html_e('Total Unit Fisik Dimiliki:', 'ryokourent'); ?></strong></label><br />
         <input type="number" id="ryokou_physical_stock" name="_ryokou_physical_stock" value="<?php echo esc_attr($physical_stock); ?>" style="width: 100%; margin-top: 4px;" min="0" max="500" step="1" placeholder="5" <?php echo $disabled_attr; ?> />
-        <span class="description" style="font-size: 11px;"><?php esc_html_e('Batas kuota maksimal unit fisik untuk model ini.', 'ryokourent'); ?></span>
+        <span class="description" style="font-size: 11px;"><?php esc_html_e('Batas kuota maksimal unit fisik untuk model ini (dapat ditambah/diubah oleh Operator & Admin).', 'ryokourent'); ?></span>
     </p>
 
     <p style="margin-top: 15px;">
@@ -290,7 +292,7 @@ function ryokourent_save_motor_meta_data($post_id) {
         update_post_meta($post_id, '_ryokou_route_character', $clean_route);
     }
 
-    // Bromo readiness checkbox (0 if unchecked, 1 if checked)
+    // Bromo / extreme route readiness checkbox (0 if unchecked, 1 if checked)
     $bromo_val = isset($_POST['_ryokou_is_bromo_ready']) ? 1 : 0;
     update_post_meta($post_id, '_ryokou_is_bromo_ready', $bromo_val);
 
@@ -301,10 +303,10 @@ function ryokourent_save_motor_meta_data($post_id) {
         update_post_meta($post_id, '_ryokou_status_label', $clean_status);
     }
 
-    // 6. Save Pricing & Stock (Requires manage_ryokourent_settings or manage_options)
-    $can_manage_settings = current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
+    // 6. Save Pricing & Stock (Allowed for Operator with edit_motors/edit_post & Admin)
+    $can_manage_pricing_and_stock = current_user_can('edit_post', $post_id) || current_user_can('edit_motors') || current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
 
-    if ($can_manage_settings) {
+    if ($can_manage_pricing_and_stock) {
         if (isset($_POST['_ryokou_price_daily'])) {
             $clean_daily = function_exists('ryokourent_sanitize_price_integer')
                 ? ryokourent_sanitize_price_integer(wp_unslash($_POST['_ryokou_price_daily']))

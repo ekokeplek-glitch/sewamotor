@@ -45,10 +45,10 @@ function ryokourent_get_roles_version() {
 
 /**
  * Daftar capability yang BOLEH dimiliki operator (whitelist mutlak).
- * Sesuai tinjauan arsitektur (reviewOP):
- * - Boleh: melihat dan mengedit motor eksisting (spesifikasi, deskripsi, status publik).
- * - Dilarang: menambah model motor baru (create_motors), menghapus (delete_*), menerbitkan (publish_*),
- *   mengubah tarif & stok (manage_ryokourent_settings), serta upload media global (upload_files).
+ * Sesuai aturan operasional terkini:
+ * - Boleh: melihat dan mengedit motor eksisting (spesifikasi, tarif sewa harian/mingguan/bulanan, stok unit fisik & plat nomor).
+ * - Dilarang: menghapus motor (delete_*), menambah/menghapus kategori motor (manage_ryokourent_settings / taxonomies),
+ *   serta konfigurasi global website (manage_options).
  * Capability lain di role ini dianggap tidak sah dan akan dicabut saat sinkronisasi.
  *
  * @return array<string,bool>

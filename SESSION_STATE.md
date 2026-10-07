@@ -6,10 +6,11 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 
 ## 1. Status Sesi Saat Ini
 * **Tanggal / Waktu:** 2026-10-07
-* **Cabang Git Aktif:** `feature/mobile-responsive-optimization` (dibuat dari `develop`)
+* **Cabang Git Aktif:** `feature/business-rules-and-admin-controls` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/business-rules-and-admin-controls` (Pembaruan aturan hak akses operator, perpanjangan sewa +24 jam, cancel booking admin dengan alasan, denda overtime manual, dan rute ekstrem Trail Bromo/Cangar/Pantai)
   - `feature/mobile-responsive-optimization` (Fitur optimasi antarmuka seluler, floating mobile bar, dan ergonomi thumb zone)
   - `feature/faq-and-pool-locations` (Fitur halaman FAQ, 2 lokasi pool resmi, dan aturan Bromo CRF)
   - `feature/admin-settings` (Fitur pengaturan harga, nomor WA, dan penyesuaian harga massal)
@@ -24,9 +25,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `TASK-026: Buat Responsive Design & Mobile-First Optimization`
-* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-responsive-design.php` 34/34 PASS.
-* **Task Selanjutnya:** `TASK-027: Buat Validasi Keamanan (Security Hardening)` (Menunggu perintah selanjutnya dari pengguna)
+* **Task Terakhir Selesai:** `Pembaruan Aturan Bisnis & Kontrol Operasional Admin` (Kelanjutan TASK-026 menuju TASK-027)
+* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-business-rules.php` 26/26 PASS, Kompilasi Next.js Succeeded.
+* **Task Selanjutnya:** `TASK-027: Buat Validasi Keamanan (Security Hardening)` (Menunggu aba-aba selanjutnya dari pengguna)
 
 ---
 

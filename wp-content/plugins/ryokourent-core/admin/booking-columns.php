@@ -86,7 +86,7 @@ function ryokourent_status_action_labels() {
         'status_dikonfirmasi' => __('Konfirmasi', 'ryokourent'),
         'status_berjalan'     => __('Serah Terima (Berjalan)', 'ryokourent'),
         'status_selesai'      => __('Selesai', 'ryokourent'),
-        'status_dibatalkan'   => __('Batalkan', 'ryokourent'),
+        'status_dibatalkan'   => __('Cancel Booking', 'ryokourent'),
     );
 }
 
@@ -121,6 +121,29 @@ function ryokourent_render_status_actions($post_id) {
 
     echo '<strong>' . esc_html(isset($labels[$current]) ? $labels[$current] : '—') . '</strong>';
 
+    // Cek dan tampilkan badge peringatan overtime untuk sewa berjalan
+    if ('status_berjalan' === $current && function_exists('ryokourent_get_booking_overtime_info')) {
+        $overtime = ryokourent_get_booking_overtime_info($post_id);
+        if (!empty($overtime['is_overdue'])) {
+            printf(
+                '<div style="display:block; margin:4px 0; padding:2px 6px; background:#fef2f2; border:1px solid #f87171; color:#b91c1c; border-radius:4px; font-size:11px; font-weight:600;">⚠ %s <span style="font-weight:normal; font-size:10px;">(Denda dihitung manual)</span></div>',
+                esc_html($overtime['label'])
+            );
+        }
+    }
+
+    // Tampilkan catatan alasan pembatalan jika pesanan berstatus dibatalkan
+    if ('status_dibatalkan' === $current) {
+        $reason = (string) get_post_meta($post_id, '_ryokou_cancellation_reason', true);
+        if (!empty($reason)) {
+            printf(
+                '<div style="margin-top:4px; font-size:11px; color:#64748b; font-style:italic;">%s: "%s"</div>',
+                esc_html__('Alasan batal', 'ryokourent'),
+                esc_html($reason)
+            );
+        }
+    }
+
     $transitions = ryokourent_get_status_transitions();
     $targets     = isset($transitions[$current]) ? $transitions[$current] : array();
     if (empty($targets)) {
@@ -137,9 +160,17 @@ function ryokourent_render_status_actions($post_id) {
 
     if (in_array('status_berjalan', $targets, true)) {
         printf(
-            '<input type="text" name="%s" placeholder="%s" style="width:120px; display:block; margin-bottom:4px;" autocomplete="off" />',
+            '<input type="text" name="%s" placeholder="%s" style="width:130px; display:block; margin-bottom:4px; font-size:11px;" autocomplete="off" />',
             esc_attr('ryokourent_plate[' . $post_id . ']'),
             esc_attr__('Plat nomor unit', 'ryokourent')
+        );
+    }
+
+    if (in_array('status_dibatalkan', $targets, true)) {
+        printf(
+            '<input type="text" name="%s" placeholder="%s" style="width:150px; display:block; margin-bottom:4px; font-size:11px;" autocomplete="off" />',
+            esc_attr('ryokourent_cancel_reason[' . $post_id . ']'),
+            esc_attr__('Alasan batal (opsional)', 'ryokourent')
         );
     }
 
@@ -147,12 +178,39 @@ function ryokourent_render_status_actions($post_id) {
         if (!isset($action_labels[$target])) {
             continue;
         }
+        $btn_class = ('status_dibatalkan' === $target) ? 'button button-small button-link-delete' : 'button button-small';
         printf(
-            '<button type="submit" name="ryokourent_status_action" value="%s" class="button button-small" style="margin:0 4px 4px 0;">%s</button>',
+            '<button type="submit" name="ryokourent_status_action" value="%s" class="%s" style="margin:0 4px 4px 0;">%s</button>',
             esc_attr($post_id . ':' . $target),
+            esc_attr($btn_class),
             esc_html($action_labels[$target])
         );
     }
+
+    // Opsi Perpanjangan Sewa (Extend Rental) untuk status berjalan (Default +1 Hari / 24 Jam)
+    if ('status_berjalan' === $current && function_exists('ryokourent_extend_rental_duration')) {
+        echo '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #cbd5e1; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">';
+        printf(
+            '<select name="%s" style="font-size:11px; height:26px; padding:0 4px; line-height:24px;">' .
+            '<option value="1" selected="selected">%s</option>' .
+            '<option value="2">%s</option>' .
+            '<option value="3">%s</option>' .
+            '<option value="7">%s</option>' .
+            '</select>',
+            esc_attr('ryokourent_extend_days[' . $post_id . ']'),
+            esc_html__('+1 Hari (24 Jam)', 'ryokourent'),
+            esc_html__('+2 Hari (48 Jam)', 'ryokourent'),
+            esc_html__('+3 Hari (72 Jam)', 'ryokourent'),
+            esc_html__('+7 Hari (1 Minggu)', 'ryokourent')
+        );
+        printf(
+            '<button type="submit" name="ryokourent_extend_action" value="%s" class="button button-small button-primary" style="font-size:11px; height:26px; line-height:24px;">%s</button>',
+            esc_attr($post_id),
+            esc_html__('Perpanjang Sewa', 'ryokourent')
+        );
+        echo '</div>';
+    }
+
     echo '</div>';
 }
 
@@ -192,10 +250,45 @@ function ryokourent_process_status_action($booking_id, $to, $plate = '') {
 }
 
 /**
- * Hook load-edit.php: tangkap POST quick action dari daftar Penyewaan.
+ * Hook load-edit.php: tangkap POST quick action dan perpanjangan sewa dari daftar Penyewaan.
  */
 function ryokourent_handle_booking_status_action() {
-    if (!isset($_POST['ryokourent_status_action'], $_REQUEST['post_type']) || 'penyewaan' !== $_REQUEST['post_type']) {
+    if (!isset($_REQUEST['post_type']) || 'penyewaan' !== $_REQUEST['post_type']) {
+        return;
+    }
+
+    $user_id = function_exists('get_current_user_id') ? get_current_user_id() : 0;
+
+    // 1. Tangani Aksi Perpanjangan Sewa (Extend Rental)
+    if (isset($_POST['ryokourent_extend_action'])) {
+        $booking_id = absint(wp_unslash($_POST['ryokourent_extend_action']));
+        if ($booking_id > 0) {
+            ryokourent_authorize_status_action($booking_id);
+
+            $extra_days = 1;
+            if (isset($_POST['ryokourent_extend_days']) && is_array($_POST['ryokourent_extend_days']) && isset($_POST['ryokourent_extend_days'][$booking_id])) {
+                $extra_days = max(1, absint($_POST['ryokourent_extend_days'][$booking_id]));
+            }
+
+            if (function_exists('ryokourent_extend_rental_duration')) {
+                $res = ryokourent_extend_rental_duration($booking_id, $extra_days);
+                if ($user_id > 0) {
+                    if ($res['success']) {
+                        set_transient('ryokourent_admin_success_' . $user_id, $res['message'], 45);
+                    } else {
+                        set_transient('ryokourent_admin_error_' . $user_id, $res['message'], 45);
+                    }
+                }
+            }
+
+            $back = wp_get_referer();
+            wp_safe_redirect($back ? $back : admin_url('edit.php?post_type=penyewaan'));
+            exit;
+        }
+    }
+
+    // 2. Tangani Perubahan Status Standar (Konfirmasi, Serah Terima, Selesai, Cancel Booking)
+    if (!isset($_POST['ryokourent_status_action'])) {
         return;
     }
 
@@ -209,9 +302,33 @@ function ryokourent_handle_booking_status_action() {
 
     ryokourent_authorize_status_action($booking_id);
 
+    // Tangani plat nomor untuk status berjalan
     $plate = '';
     if (isset($_POST['ryokourent_plate']) && is_array($_POST['ryokourent_plate']) && isset($_POST['ryokourent_plate'][$booking_id]) && is_scalar($_POST['ryokourent_plate'][$booking_id])) {
         $plate = wp_unslash((string) $_POST['ryokourent_plate'][$booking_id]);
+    }
+
+    // Tangani alasan pembatalan jika status tujuan adalah dibatalkan
+    if ('status_dibatalkan' === $to) {
+        $reason = '';
+        if (isset($_POST['ryokourent_cancel_reason']) && is_array($_POST['ryokourent_cancel_reason']) && isset($_POST['ryokourent_cancel_reason'][$booking_id]) && is_scalar($_POST['ryokourent_cancel_reason'][$booking_id])) {
+            $reason = sanitize_text_field(wp_unslash((string) $_POST['ryokourent_cancel_reason'][$booking_id]));
+        }
+
+        if (function_exists('ryokourent_cancel_booking')) {
+            $result = ryokourent_cancel_booking($booking_id, $reason);
+            if ($user_id > 0) {
+                if ($result['success']) {
+                    set_transient('ryokourent_admin_success_' . $user_id, $result['message'], 45);
+                } else {
+                    set_transient('ryokourent_admin_error_' . $user_id, $result['message'], 45);
+                }
+            }
+
+            $back = wp_get_referer();
+            wp_safe_redirect($back ? $back : admin_url('edit.php?post_type=penyewaan'));
+            exit;
+        }
     }
 
     ryokourent_process_status_action($booking_id, $to, $plate);
