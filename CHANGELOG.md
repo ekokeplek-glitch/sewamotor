@@ -1,0 +1,390 @@
+# CHANGELOG: RYOKOURENT
+
+Semua perubahan penting pada proyek Ryokourent akan didokumentasikan di file ini.
+Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mengikuti standar [Semantic Versioning](https://semver.org/).
+
+---
+
+## [Unreleased] - 2026-10-08
+
+### Added
+- **Fase 4 (TASK-030: Buat Panduan Deployment & Checklist Produksi / Production Deployment & Packaging):**
+  - **Penyusunan Panduan Deployment Lengkap (`docs/DEPLOYMENT_GUIDE.md`):**
+    - Panduan deployment komprehensif ke Web Server LiteSpeed Enterprise / OpenLiteSpeed dan Nginx 1.24+ untuk lingkungan produksi.
+    - Aturan caching spesifik LiteSpeed Cache (`.htaccess`) dan FastCGI Nginx yang mengecualikan endpoint AJAX `/wp-admin/admin-ajax.php`, aksi booking `ryokourent_process_booking`, dan token refresh `ryokourent_refresh_nonce`.
+    - Konfigurasi sertifikat SSL Let's Encrypt / AutoSSL dan header pengerasan keamanan HTTP (HSTS, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`).
+    - Pengerasan keamanan berkas `wp-config.php` produksi (`WP_DEBUG: false`, `DISALLOW_FILE_EDIT: true`, `FORCE_SSL_ADMIN: true`, `WP_POST_REVISIONS: 5`).
+    - Sinkronisasi zona waktu resmi `Asia/Jakarta` (WIB) dan struktur permalink `/%postname%/`.
+    - Checklist verifikasi pra-peluncuran (*pre-launch*) dan uji asap fungsionalitas pasca-deployment (*smoke test*).
+    - Prosedur otomatisasi pencadangan data (backup database MySQL harian pukul 02:00 WIB dan folder media `uploads/` mingguan) serta retensi 30 hari dan offsite cloud sync.
+    - 3 Skenario pemulihan bencana dan prosedur rollback (rollback plugin/tema bermasalah, restore database MySQL, dan pemulihan total server).
+  - **Konfigurasi Atribut Git untuk Paket Rilis Bersih (`.gitattributes`):**
+    - Pembuatan berkas `.gitattributes` root dan `wp-content/plugins/ryokourent-core/.gitattributes` dengan aturan `export-ignore`.
+    - Menjamin paket rilis zip produksi (`git archive`) 100% bebas dari direktori pengujian `tests/`, konfigurasi linter/development (`.phpcs.xml.dist`, `eslint`), dan dokumen internal AI.
+  - **Pembaruan Dokumentasi Utama Proyek (`README.md`):**
+    - Penyelarasan pohon direktori folder `docs/` dan penambahan instruksi quick start pembuatan paket rilis bersih via `git archive`.
+  - **Verifikasi Keamanan Inti:**
+    - Verifikasi kepatuhan konstanta `WP_UNINSTALL_PLUGIN` pada `uninstall.php`.
+    - Verifikasi registrasi `flush_rewrite_rules()` otomatis pada fungsi aktivasi plugin `ryokourent-core.php`.
+
+- **Fase 4 (TASK-029: Buat Dokumentasi Admin & SOP Operator / Operational SOP & Guides):**
+  - **Penyusunan Buku Panduan Operator & SOP Lapangan (`docs/OPERATOR_MANUAL.md`):**
+    - Penjelasan terperinci batasan wewenang role Operator: hak pengelolaan armada motor & booking sewa, larangan mutlak menghapus motor (`delete_motors`), larangan manipulasi kategori motor, serta proteksi 403 halaman pengaturan website.
+    - SOP 1: Standar respon cepat konfirmasi pesan WhatsApp pelanggan dengan SLA < 5 menit dan panduan membaca template pesan berkode booking unik `RYK-...`.
+    - SOP 2: Verifikasi ketat 3 dokumen persyaratan (e-KTP asli fisik wajib dititipkan, SIM C / paspor, dokumen pendukung 2), validasi akun media sosial aktif, kontak darurat keluarga independen, dan standar kepatuhan privasi data pelanggan (UU PDP No. 27/2022).
+    - SOP 3: Verifikasi rute perjalanan (Rute Standar Malang Kota & Wisata Batu vs Rute Ekstrem Bromo, Cangar, dan Pantai Selatan), larangan motor matik ke pasir Bromo demi keselamatan, kewajiban unit Trail Honda CRF 150L, dan kepatuhan batas wilayah Malang Raya.
+    - SOP 4: Alur status transaksi di WP-Admin (Menunggu Konfirmasi -> Dikonfirmasi -> Sewa Berjalan -> Selesai Sewa) dan validasi alokasi plat nomor fisik bebas konflik jadwal.
+    - SOP 5: Aturan sewa kelipatan 24 jam, toleransi keterlambatan 2 jam gratis (*grace period*), penagihan denda manual jika keterlambatan > 2 jam, dan prosedur perpanjangan sewa resmi (+24 jam).
+    - SOP 6: Prosedur serah terima unit di 2 pool resmi (Pool Dinoyo & Pool Batu) dan layanan antar-jemput stasiun/hotel dengan checklist fisik 4 sisi bodi motor dan fasilitas gratis (2 helm SNI, 2 jas hujan, phone holder).
+    - SOP 7: Prosedur pengembalian unit, pengecekan bodi/bensin, pengembalian e-KTP fisik, dan penutupan status pesanan.
+    - Bagian 9: Prosedur darurat lapangan (kunci hilang, ban bocor, kecelakaan ringan, mesin mogok, dan penyewa hilang kontak).
+  - **Penyusunan Panduan Administrator & Pengelola Sistem (`docs/ADMIN_GUIDE.md`):**
+    - Matriks Role-Based Access Control (RBAC) perbandingan Administrator vs Operator vs Tamu publik.
+    - Panduan konfigurasi nomor WhatsApp resmi perusahaan dan jam operasional pool (07:00 – 23:00 WIB).
+    - Panduan pengelolaan tarif dan eksekusi Penyesuaian Harga Massal (*Bulk Price Adjustment*) peak season dengan mekanisme keamanan *two-pass fail-safe rollback*.
+    - Manajemen katalog armada motor, inventaris kuota fisik tertutup (`_ryokou_physical_stock`), dan normalisasi daftar plat nomor kendaraan (`_ryokou_plate_numbers`).
+    - Panduan penggunaan Dashboard Operasional untuk memantau unit disewa hari ini, booking menunggu konfirmasi, dan sebaran unit aktif per pool.
+    - Prosedur pembatalan pesanan resmi oleh Admin (*Cancel Booking with Reason*) dan pelepasan kuota otomatis kembali ke pool.
+    - Prosedur pembuatan akun staf Operator baru dengan prinsip *Least Privilege* dan prosedur offboarding aman.
+    - Kepatuhan UU Perlindungan Data Pribadi (UU PDP No. 27/2022) pada data CPT `penyewaan` serta jadwal pencadangan rutin (*daily MySQL & weekly uploads backup*).
+
+- **Fase 4 (TASK-028: Buat Pengujian Manual dan Otomatis / QA Testing Matrix):**
+  - **Matriks Pengujian QA (20 Skenario):**
+    - Verifikasi penuh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus **PASSED** (100%).
+    - Pencatatan hasil aktual dan kriteria keberhasilan pada masing-masing skenario uji dari aktivasi plugin, sanitasi form, validasi kontak terpisah, aturan Bromo CRF 150L, toleransi overtime, pencegahan double booking atomik, deep link WhatsApp, RBAC operator vs admin, hingga ergonomi sentuh mobile 48px.
+  - **Penyempurnaan Unit Test Kalkulasi Tarif (`tests/test-pricing-calculation.php`):**
+    - Penambahan skenario sewa 14 hari (2 paket mingguan = Rp 1.000.000).
+    - Penambahan skenario sewa 30 hari (1 paket bulanan = Rp 1.600.000).
+    - Penambahan skenario kombinasi termurah 37 hari (1 bulan + 1 minggu = Rp 2.100.000).
+    - Penambahan pengujian unit trip Bromo Honda Trail CRF 150L (3 hari = Rp 600.000).
+    - Pengujian pemformatan mata uang Rupiah Indonesia (`ryokourent_format_rupiah`).
+  - **Penyempurnaan Unit Test Ketersediaan Armada (`tests/test-availability.php`):**
+    - Pengujian boundary condition presisi waktu sewa menyentuh batas akhir (REVIEW-ARCHITECTURE.md §5 item 5).
+    - Pengujian skenario double booking Honda Trail CRF 150L stok 2 unit penuh.
+    - Pengujian validasi plat nomor fisik (`ryokourent_validate_allocated_plate`) mendeteksi plat terdaftar, plat fiktif, dan tabrakan plat ganda.
+  - **Automated QA Matrix Runner (`tests/test-qa-matrix.php`):**
+    - Pembuatan skrip automated runner yang mengeksekusi 20 pengujian unit untuk seluruh skenario TC-001 s/d TC-020 secara otomatis.
+  - **Penyempurnaan Hak Akses Operator & Ketahanan XAMPP (`includes/user-roles.php`):**
+    - Penambahan capability motor eksplisit (`read_motor`, `edit_motor`, `create_motor`) di whitelist operator.
+    - Pencabutan eksplisit kapabilitas terlarang (`delete_motor`, `delete_motors`, dll).
+    - Penyegaran otomatis objek `$current_user` di memori PHP pada pemanggilan `ryokourent_ensure_operator_capabilities()`.
+    - Pendaftaran hook sinkronisasi otomatis pada `init` dan `admin_init` sehingga sistem langsung menyelaraskan diri di instalasi lokal XAMPP.
+
+- **Fase 4 (TASK-027: Buat Validasi Keamanan / Security Hardening):**
+  - **Pencegahan Eksekusi Langsung File PHP (Direct File Execution Guards):**
+    - Audit 100% berkas PHP di plugin `ryokourent-core` dan subdirektori (`admin/`, `includes/`, `public/`, `assets/`, `tests/`).
+    - Penambahan guard `if (!defined('ABSPATH')) { exit; }` pada seluruh file `index.php` (silence is golden) untuk mencegah eksekusi langsung via browser HTTP.
+  - **Audit Sanitasi Input & Pencegahan Injeksi (XSS & SQL Injection):**
+    - Verifikasi sanitasi input pada semua parameter POST, GET, dan AJAX (`sanitize_text_field`, `sanitize_textarea_field`, `sanitize_key`, `absint`, `wp_unslash`, `esc_url_raw`).
+    - Penambahan `wp_unslash` pada `$check_motor_id` di `includes/meta-boxes.php` dan `absint(wp_unslash($_GET['revision']))` di `includes/post-types.php`.
+    - Sanitasi nomor telepon Indonesia (`ryokourent_sanitize_phone`) dan plat nomor huruf kapital (`ryokourent_sanitize_plate_numbers_text`).
+    - Audit query `$wpdb`: 100% kueri database menggunakan `$wpdb->prepare` atau `$wpdb->update`.
+  - **Pencegahan Denial of Service (DoS) Kueri Tak Terbatas:**
+    - Penghapusan seluruh kueri `posts_per_page => -1` yang berisiko memory exhaustion.
+    - Pembatasan kueri penghitungan ketersediaan di `includes/availability.php` (`posts_per_page => 500, no_found_rows => true`).
+    - Pembatasan dropdown armada di `public/forms.php` (`posts_per_page => 100, no_found_rows => true`).
+    - Pembatasan batas katalog di `public/templates.php` (`posts_per_page` dibatasi maksimum 100 dengan `no_found_rows => true`).
+  - **Verifikasi Nonce & Ketahanan Cache:**
+    - Nonce protection di setiap aksi mutasi data (`check_admin_referer` untuk quick action & admin settings, `wp_verify_nonce` untuk booking submission).
+    - Penanganan nonce kedaluwarsa transparan (HTTP 403 `invalid_nonce` + `refreshed_nonce`) agar formulir tetap berjalan lancar pada hosting ber-cache (LiteSpeed / WP Rocket / Cloudflare).
+  - **Audit Otorisasi & Role-Based Access Control (RBAC):**
+    - Sinkronisasi capability `auth_callback` untuk post meta `_ryokou_physical_stock` dan `_ryokou_plate_numbers` di `includes/meta-fields.php` agar selaras dengan izin operator (`edit_motors`).
+    - Penjagaan mutlak halaman admin settings & bulk pricing hanya untuk administrator (`manage_ryokourent_settings` dengan guard 403 `wp_die`).
+    - Perlindungan PII (UU PDP): CPT `penyewaan` terproteksi dengan `public => false`, `publicly_queryable => false`, dan `show_in_rest => false`.
+  - **Automated Security Hardening Test Suite:**
+    - Pembuatan `tests/test-security-hardening.php` memverifikasi pencegahan direct execution, sanitasi XSS/SQLi, validasi nonce, guard RBAC, rate-limiting, honeypot, dan proteksi privasi REST API.
+
+- **Pembaruan Aturan Bisnis & Kontrol Operasional Admin (Refinement & Operational Rules):**
+  - **Hak Akses Operator (Role & Capabilities):**
+    - Pembaruan izin di `includes/meta-boxes.php` dan `includes/user-roles.php`: Operator kini diizinkan mengedit armada eksisting, menambah/mengubah jumlah unit fisik (`_ryokou_physical_stock`) dan daftar plat nomor (`_ryokou_plate_numbers`), serta mengganti tarif sewa harian/mingguan/bulanan (`_ryokou_price_*`).
+    - Operator tetap dilarang keras menghapus unit motor (`delete_motors` dicabut) dan dilarang menambah/mengedit/menghapus kategori motor (taxonomy `kategori_motor` tetap eksklusif Administrator dengan cap `manage_ryokourent_settings`).
+  - **Durasi Sewa & Opsi Perpanjangan Sewa (Extend Rental):**
+    - Durasi sewa dikunci kelipatan 24 jam.
+    - Fungsi `ryokourent_extend_rental_duration($booking_id, $extra_days, $notes)` di `includes/booking.php`: Memperpanjang masa sewa kelipatan 24 jam (default +1 hari dengan opsi pilihan hari) dengan pengecekan lock ketersediaan kuota.
+    - Waktu keterlambatan (overtime) saat diperpanjang dialihkan menjadi akumulasi masa sewa resmi (bukan overtime lagi), jadwal sewa diperpanjang, dan biaya sewa diakumulasikan resmi.
+  - **Fitur Pembatalan Pesanan oleh Admin (Cancel Booking):**
+    - Fungsi `ryokourent_cancel_booking($booking_id, $reason)` di `includes/booking.php`: Pembatalan dilakukan oleh Admin via tombol "Cancel Booking" di panel admin, disertai input opsional catatan alasan pembatalan (`_ryokou_cancellation_reason`).
+    - Kuota unit motor segera dikembalikan ke pool saat pembatalan diproses.
+    - Fitur pembatalan mandiri di web dihilangkan (diarahkan melalui WhatsApp).
+  - **Pelacakan Overtime & Denda Manual:**
+    - Fungsi `ryokourent_get_booking_overtime_info($booking_id)`: Overtime jam tetap dihitung untuk pelacakan fisik ketersediaan unit dan memunculkan badge peringatan keterlambatan `[Overtime: +X Jam]` di admin list table.
+    - Denda TIDAK dihitung otomatis oleh web/sistem (denda manual dihitung oleh admin sesuai kondisi lapangan).
+  - **Aturan Rute Ekstrem Wajib Trail Honda CRF 150L:**
+    - Perluasan aturan rute ekstrem tidak hanya untuk Bromo, tetapi juga jalur curam naik-turun atau off-road seperti Jalur Cangar dan Pantai Pasir Malang Selatan.
+    - Seluruh motor matik (BeAT, Scoopy, Vario, PCX) dilarang keras demi keamanan rem & transmisi, wajib menggunakan Trail CRF 150L.
+    - Pembaruan banner advisory dan FAQ di `public/templates.php`, metabox CPT motor, dan `app/page.tsx`.
+  - **Automated Unit Test Suite:**
+    - Pembuatan `tests/test-business-rules.php` (26 skenario pengujian unit lolos verifikasi).
+
+- **Fase 4 (TASK-026: Buat Responsive Design & Mobile-First Optimization):**
+  - Implementasi komponen Floating Mobile Action Bar di `public/templates.php`:
+    - Fungsi `ryokourent_render_floating_mobile_bar()`: Bar bawah mengambang yang responsif dengan status jam operasional (07:00 - 23:00 WIB), indikator animasi pulse dot, tombol akses cepat formulir booking, dan tautan langsung WhatsApp admin.
+    - Dukungan kustomisasi dinamis via parameter (`wa_message`, `booking_anchor`) serta sinkronisasi otomatis ke pengaturan `ryokourent_get_settings()`.
+  - Pendaftaran shortcode baru di `public/shortcodes.php`:
+    - `[ryokou_mobile_bar]` (render floating mobile action bar untuk integrasi theme atau page builder).
+  - Peningkatan styling CSS Mobile-First di `assets/css/ryokourent-public.css`:
+    - Pembatasan tinggi ketat bar mengambang (`max-height: 15vh`, <= 15% tinggi viewport HP sesuai blueprint).
+    - Ergonomi *thumb zone*: tombol aksi mudah dijangkau dengan ibu jari satu tangan.
+    - Ukuran touch target minimum 44x44px (`min-height: 44px`) untuk aksesibilitas seluler.
+    - Clearance padding otomatis pada body (`padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px))`) untuk memastikan formulir dan footer tidak tertutup floating bar.
+    - Pencegahan horizontal overflow (`overflow-x: hidden`) pada resolusi smartphone sempit (360px - 430px).
+    - Optimasi grid katalog, kartu pool, tombol maps, filter horizontal scrollable, dan accordion FAQ pada layar kecil.
+  - Peningkatan responsivitas pada Child Theme `wp-content/themes/generatepress-child/style.css`:
+    - Unstacking posisi sticky pricing card menjadi static di layar mobile untuk alur baca natural.
+    - Sentuhan tombol dan breadcrumb breadcrumb navigation memenuhi touch target 44px.
+    - Integrasi floating mobile bar pada template detail motor `single-motor.php` (dengan pre-filled pesan unit motor) dan template halaman `template-faq-pool.php`.
+  - Penambahan floating mobile action bar pada aplikasi Next.js `app/page.tsx` dengan transisi halus dan clearance footer.
+  - Pembuatan automated unit test `tests/test-responsive-design.php` (34 pengujian komprehensif, seluruhnya PASS).
+
+- **Fase 3 (TASK-025: Buat Halaman FAQ dan Lokasi Pool):**
+  - Implementasi fungsi katalog informasi pool dan FAQ blueprint di `public/templates.php`:
+    - `ryokourent_get_faq_items()`: 7 poin FAQ resmi blueprint (dokumen persyaratan e-KTP asli + 2 pendukung, larangan matik ke pasir Bromo karena overheat CVT & slip, kewajiban Trail CRF 150L, layanan antar-jemput fleksibel, jam operasional 07:00-23:00 WIB, overtime grace period 2 jam gratis, dan batas wilayah Malang-Batu).
+    - `ryokourent_get_pool_locations_data()`: 2 lokasi pool resmi (Pool 1 Dinoyo Malang & Pool 2 Diponegoro Batu) dengan sinkronisasi dinamis ke opsi pengaturan `ryokourent_get_settings()`.
+    - `ryokourent_render_faq_section()`: Komponen HTML FAQ dengan banner syarat dokumen e-KTP dan accordion interaktif berbasis semantik ARIA (`aria-expanded`, `aria-controls`).
+    - `ryokourent_render_pool_locations_section()`: Kartu informasi 2 pool dengan tombol navigasi Google Maps, status buka, dan catatan antar-jemput stasiun/hotel.
+    - `ryokourent_render_bromo_advisory_banner()`: Banner peringatan bahaya matik di lautan pasir Bromo dengan tombol filter cepat ke armada Trail CRF 150L.
+  - Pendaftaran shortcode baru di `public/shortcodes.php`:
+    - `[ryokou_faq]` (render FAQ accordion 7 poin).
+    - `[ryokou_pools]` (render informasi 2 lokasi pool resmi).
+    - `[ryokou_bromo_advisory]` (render banner edukasi wajib Bromo).
+  - Skrip interaktivitas Vanilla JS di `assets/js/ryokourent-filter.js`:
+    - Accordion toggle mulus dengan keyboard navigation accessibility dan single-active or multi-active state.
+    - Event listener untuk trigger CTA banner Bromo yang otomatis mengaktifkan filter katalog Trail Adventure.
+  - Penambahan styling CSS responsif mobile-first di `assets/css/ryokourent-public.css` dan `wp-content/themes/generatepress-child/style.css`.
+  - Pembuatan template halaman GeneratePress Child Theme:
+    - `wp-content/themes/generatepress-child/templates/template-faq-pool.php`
+    - `wp-content/themes/generatepress-child/template-faq-pool.php`
+  - Penambahan showcase interaktif di aplikasi Next.js `app/page.tsx`:
+    - Komponen accordion 7 poin FAQ blueprint dengan state aktif dan transisi chevron.
+    - Kartu pool lokasi Dinoyo dan Batu lengkap dengan tombol rute Google Maps dan badge keunggulan.
+  - Pembuatan unit test otomatis `tests/test-faq-pool.php` (54 skenario pengujian, seluruhnya PASS).
+
+- **Fase 3 (TASK-024: Pengaturan Harga dan Nomor WhatsApp / Admin Settings):**
+  - Pembuatan modul konfigurasi terpusat `includes/settings.php`:
+    - Pengambilan konfigurasi dengan fallback default (`ryokourent_get_default_settings()`, `ryokourent_get_settings()`, `ryokourent_get_operating_hours()`).
+    - Penyimpanan dan validasi ketat pengaturan umum: nomor WhatsApp utama (08xx/628xx), nomor WA cadangan, jam operasional (07:00-23:00 WIB), serta tautan peta Google Maps pool Dinoyo dan Batu.
+    - Implementasi algoritma penyesuaian harga aman `ryokourent_calculate_adjusted_price()` dan fungsi eksekusi massal `ryokourent_apply_bulk_price_adjustment()`.
+    - Penerapan batas keamanan ketat (ADR-012): persentase dibatasi $-50\%$ s/d $+200\%$, harga baru wajib $> \text{Rp } 0$, pembulatan seribu rupiah, dan validasi atomik *two-pass* (batal serempak jika ada satu motor menghasilkan harga $\le 0$).
+  - Pembuatan antarmuka admin `admin/admin-settings.php`:
+    - Pendaftaran submenu di bawah menu Penyewaan dan menu Armada Motor dengan hak akses eksklusif `manage_ryokourent_settings`.
+    - Penerapan penjaga akses server-side `ryokourent_check_settings_permission_or_die()` yang menolak Operator dengan respon HTTP 403 Forbidden.
+    - Antarmuka dual-tab: "Kontak WhatsApp & Jam Operasional" dan "Penyesuaian Tarif Massal (Peak Season)".
+    - Pratinjau tabel tarif armada saat ini untuk referensi admin.
+  - Penambahan helper `ryokourent_update_motor_pricing()` pada `includes/pricing.php`.
+  - Penambahan keputusan arsitektur ADR-012 di `DECISIONS.md`.
+  - Pembuatan automated unit test `tests/test-admin-settings.php` (44 pengujian, seluruhnya PASS).
+
+- **Fase 3 (TASK-023: Perubahan Status Booking, Quick Actions & Validasi Plat):**
+  - Pembuatan quick action perubahan status booking di `admin/booking-columns.php`: kolom "Status & Aksi" dengan tombol aksi spesifik per status (Konfirmasi, Serah Terima/Berjalan, Selesai, Batalkan).
+  - Proteksi keamanan berlapis pada quick action: nonce spesifik per booking (`ryokourent_status_<id>`), capability check `manage_ryokourent_bookings` (penolakan HTTP 403 Forbidden), dan whitelist status.
+  - Form input plat nomor unit dinamis pada status Dikonfirmasi sebelum serah terima unit (status Berjalan).
+  - Implementasi aturan transisi dan validasi alur operasional di `includes/booking.php` (ADR-011):
+    - Matriks transisi resmi `ryokourent_get_status_transitions()`: Menunggu -> Dikonfirmasi -> Berjalan -> Selesai; pembatalan hanya sebelum serah terima (dari Menunggu atau Dikonfirmasi); Selesai dan Dibatalkan bersifat final.
+    - Fungsi normalisasi plat nomor `ryokourent_normalize_plate_for_storage()` dan validasi transisi `ryokourent_validate_status_transition()`.
+    - Fungsi eksekusi transisi status aman `ryokourent_transition_booking_status()` dengan pengecekan ulang kuota unit secara atomik di dalam lock `ryokourent_with_motor_lock()` (mengecualikan booking aktif bersangkutan).
+    - Validasi plat nomor dengan `ryokourent_validate_allocated_plate()` di dalam lock sebelum transisi ke status Berjalan diizinkan.
+    - Pembuangan otomatis cache transient dashboard (`ryokourent_dashboard_stats`) via hook `transition_post_status`.
+    - Sinkronisasi aturan transisi dan validasi plat yang seragam pada jalur dropdown metabox edit booking via filter `wp_insert_post_data` di `includes/meta-boxes.php`.
+  - Penambahan ADR-011 di `DECISIONS.md`.
+  - Pembuatan automated unit test `tests/test-booking-status-actions.php` (86 pengujian komprehensif, seluruhnya PASS).
+
+- **Fase 3 (TASK-022: Dashboard Booking & Operasional Armada):**
+  - Pembuatan `admin/dashboard.php`: submenu "Dashboard" di bawah menu Penyewaan (capability `manage_ryokourent_bookings`, 403 bagi user tanpa hak) berisi Unit Disewa Hari Ini, Booking Menunggu Konfirmasi, dan Unit Aktif per lokasi pool.
+  - Statistik dihitung dengan query efisien (`fields => 'ids'`, `no_found_rows => true`, batas 500) dan di-cache transient `ryokourent_dashboard_stats` selama 5 menit; cache dibuang otomatis saat status/booking penyewaan berubah atau tanggal WIB berganti (reviewOP M12).
+  - Pemetaan nilai pickup tersimpan (label form booking) ke slug lokasi resmi `ryokourent_get_pool_locations()`.
+  - Pembuatan `admin/booking-columns.php`: kolom Motor, Jadwal Sewa, dan Total pada daftar Penyewaan.
+  - Pembuatan automated unit test `tests/test-admin-dashboard.php` (28 pengujian, seluruhnya PASS).
+
+- **Fase 3 (TASK-021: Capability dan Pembatasan Akses RBAC & Tindak Lanjut reviewOP):**
+  - Implementasi pemetaan custom capabilities CPT `motor` (`capability_type => array('motor', 'motors')`) dan CPT `penyewaan` (`capability_type => array('penyewaan', 'penyewaans')`) dengan `map_meta_cap => true` di `includes/post-types.php`.
+  - Peningkatan hak akses granular role `ryokourent_operator`:
+    - Diizinkan membaca dan mengedit motor eksisting (`read`, `manage_ryokourent_bookings`, `edit_motors`, `edit_others_motors`, `edit_published_motors`).
+    - Dilarang membuat motor baru (`create_motors`), menghapus motor (`delete_motors`), mengubah tarif & kuota fisik (`manage_ryokourent_settings`), serta upload file global (`upload_files`).
+  - Penambahan helper hak akses dan guard server-side di `includes/user-roles.php`:
+    - `ryokourent_current_user_can_manage_settings()`
+    - `ryokourent_current_user_can_manage_bookings()`
+    - `ryokourent_check_settings_permission_or_die()` yang mengeksekusi penolakan HTTP 403 Forbidden.
+  - Implementasi validasi alokasi plat nomor unit fisik `ryokourent_validate_allocated_plate()` di `includes/availability.php` untuk memverifikasi kecocokan plat terhadap inventaris model motor dan mendeteksi konflik plat pada pesanan bertabrakan (reviewOP M6).
+  - Integrasi validasi plat pada penyimpanan CPT `penyewaan` dan optimalisasi kueri dropdown armada di `includes/meta-boxes.php` (reviewOP M12).
+  - Penambahan ADR-009 dan ADR-010 di `DECISIONS.md`.
+  - Pembuatan automated unit test `tests/test-capabilities-access.php` (23 pengujian, seluruhnya PASS).
+
+- **Fase 3 (TASK-020: Role Operator Ryokourent):**
+  - Pembuatan modul `wp-content/plugins/ryokourent-core/includes/user-roles.php`:
+    - Role `ryokourent_operator` ("Operator Ryokourent") dengan whitelist capability `read` dan `manage_ryokourent_bookings`; tanpa hak edit tema, plugin, user, atau pengaturan tarif.
+    - Registrasi idempoten yang mencabut capability berlebih, memulihkan capability yang hilang, dan menyelaraskan label role lama.
+    - Sinkronisasi otomatis berbasis versi skema (`ryokourent_roles_version`) pada hook `init`.
+    - Pembersihan deaktivasi aman: role hanya dihapus jika tidak dipakai user.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-user-roles.php` (40 pengujian, seluruhnya PASS).
+
+### Changed
+- `ryokourent-core.php`: activation hook memakai `ryokourent_install_operator_role()` menggantikan `add_role` inline (label diseragamkan menjadi "Operator Ryokourent"); deactivation hook memanggil `ryokourent_deactivate_operator_role()`.
+- `uninstall.php`: menghapus role operator (user dipindah ke `subscriber`), mencabut capability kustom dari administrator, dan menghapus opsi `ryokourent_roles_version`.
+
+## [Unreleased] - 2026-10-06
+
+### Added
+- **Fase 3 (TASK-019: Penyimpanan Booking CPT Penyewaan & Nonce Handler Kompatibel Cache):**
+  - Implementasi fungsi generator kode booking `ryokourent_generate_booking_code()` pada `includes/booking.php`:
+    - Menghasilkan format kode booking resmi `RYK-YYYYMMDD-XXXX` yang unik dan mudah diverifikasi operator admin.
+  - Implementasi fungsi penyimpanan data transaksi `ryokourent_save_booking_entry($clean_data)`:
+    - Menyimpan pemesanan langsung ke CPT `penyewaan` dengan status `status_menunggu` dan format judul `[KODE] - [NAMA]`.
+    - Menyimpan metadata komprehensif per `DATA_MODEL.md` (`_ryokou_booking_code`, `_ryokou_booking_name`, `_ryokou_booking_whatsapp`, `_ryokou_booking_emergency`, `_ryokou_booking_ktp_address`, `_ryokou_booking_stay_address`, `_ryokou_booking_motor_id`, `_ryokou_booking_pickup_loc`, `_ryokou_booking_trip_destination`, `_ryokou_booking_start_datetime`, `_ryokou_booking_end_datetime`, `_ryokou_booking_total_days`, `_ryokou_booking_total_price`, `_ryokou_booking_notes`).
+    - Dibungkus di dalam atomic lock armada (`ryokourent_with_motor_lock`) untuk mencegah race condition.
+  - Pendaftaran endpoint AJAX `wp_ajax_ryokourent_process_booking` & `wp_ajax_nopriv_ryokourent_process_booking` (dan alias `submit_booking`):
+    - Mengirim header anti-cache `X-LiteSpeed-Cache-Control: no-cache` dan `nocache_headers()`.
+    - Menangani invalid nonce dengan mengembalikan token `refreshed_nonce` pada response 403.
+    - Pendaftaran endpoint pembaharuan nonce `wp_ajax_ryokourent_refresh_nonce`.
+  - Integrasi kode booking unik ke dalam draf pesan WhatsApp resmi pada `includes/whatsapp.php`.
+  - Peningkatan frontend `assets/js/ryokourent-booking.js`:
+    - Menggunakan action `ryokourent_process_booking`.
+    - Menangani error 403 stale nonce secara transparan dengan automatic single retry menggunakan token segar.
+    - Menampilkan notifikasi sukses memuat kode pesanan sebelum pengalihan ke WhatsApp.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-booking-storage.php` (12 assertions pengujian format kode booking, atribut CPT, metadata lengkap, penanganan nonce kedaluwarsa 403, dan tautan deep link WhatsApp).
+
+## [Unreleased] - 2026-10-01
+
+### Added
+- **Fase 3 (TASK-018: Generator Pesan & Tautan WhatsApp Resmi):**
+  - Pembuatan modul generator WhatsApp `wp-content/plugins/ryokourent-core/includes/whatsapp.php`:
+    - Fungsi `ryokourent_get_official_wa_number()`: menentukan nomor WhatsApp admin secara aman di sisi server dari opsi database dengan sanitasi internasional (`628...`).
+    - Fungsi `ryokourent_build_whatsapp_message($data)`: menyusun draf pesan pemesanan resmi berformat rapi, ber-emotikon terstruktur (🛵, 📋, 👤, 🔒), mencakup rincian jadwal, durasi, lokasi, rute tujuan, estimasi biaya, identitas penyewa lengkap, kontak darurat keluarga terpisah, dan klausul UU PDP.
+    - Fungsi `ryokourent_get_whatsapp_url($data)`: menghasilkan tautan resmi `https://wa.me/{nomor}?text={encoded}` menggunakan `rawurlencode()` (RFC 3986) sehingga teks dan emotikon aman tanpa risiko karakter terpotong.
+    - Pendaftaran endpoint AJAX `ryokourent_get_whatsapp_draft` untuk generator pesan dinamis.
+  - Integrasi ke formulir publik `wp-content/plugins/ryokourent-core/public/forms.php`:
+    - Penambahan boks pratinjau pesan dinamis `#ryokou-wa-preview-text`.
+  - Integrasi ke antarmuka JavaScript `wp-content/plugins/ryokourent-core/assets/js/ryokourent-booking.js`:
+    - Pembaruan live preview draf pesan secara instan saat pengguna mengisi formulir.
+    - Penambahan lokalisasi `adminWa` dan penanganan redirect otomatis ke tautan `wa_url`.
+  - Penambahan styling CSS pratinjau WhatsApp pada `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-whatsapp-generator.php` (16 pengujian komprehensif format pesan, emotikon, normalisasi nomor admin 628..., tautan `wa.me`, integrasi `rawurlencode()`, dan round-trip decode).
+- **Fase 3 (TASK-017: Pencegahan Double Booking Atomik pada Dua Titik Kritis):**
+  - Implementasi fungsi pengunci atomik `ryokourent_with_motor_lock($motor_id, $callback, $timeout_seconds)` pada `includes/availability.php`:
+    - Menggunakan mekanisme `GET_LOCK` MySQL atau transient terisolasi per ID motor dengan pelepasan mutlak dalam blok `finally { RELEASE_LOCK }` untuk mencegah deadlock.
+    - **Titik Kritis 1 (Online Form Submit):** Integrasi ke `ryokourent_validate_booking_submission()` di `includes/booking.php` untuk memvalidasi ketersediaan armada di dalam lock dan langsung menolak pesanan jika kuota penuh.
+    - **Titik Kritis 2 (Konfirmasi Operator):** Implementasi fungsi `ryokourent_confirm_booking()` dan filter hook `transition_post_status` untuk memblokir operator mengonfirmasi pesanan jika kuota fisik telah penuh terisi booking lain pada jadwal terkait, mengembalikan status ke status awal, serta menampilkan admin notice.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-atomic-lock.php` (7 pengujian eksekusi lock, pelepasan finally, simulasi 2 request bersamaan pada unit kuota 1, dan proteksi konfirmasi operator).
+- **Fase 3 (TASK-016: Validasi Ketersediaan Unit & Perlindungan Privasi Stok):**
+  - Pembuatan modul mesin kueri ketersediaan `wp-content/plugins/ryokourent-core/includes/availability.php`:
+    - Fungsi internal `ryokourent_get_motor_physical_stock($motor_id)`: mengambil kuota fisik unit motor yang tertutup bagi akses publik.
+    - Fungsi `ryokourent_count_overlapping_bookings()`: kueri efisien berbasis `fields => 'ids'` untuk mendeteksi tumpang tindih waktu sewa ($S_{booking} < E \text{ dan } E_{booking} > S$) pada status yang mengonsumsi kuota (`status_dikonfirmasi`, `status_berjalan`).
+    - Fungsi `ryokourent_check_availability()`: formula ketersediaan unit $(\text{PhysicalStock} - \text{ActiveBookings}) > 0$.
+    - Pendaftaran endpoint AJAX publik `ryokourent_check_unit_availability`: secara ketat hanya mengembalikan status boolean `available: true/false` dan pesan status tanpa pernah membocorkan angka stok fisik ke publik.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-availability.php` (8 pengujian skenario simulasi 3 booking aktif pada stok 3 menghasilkan available: false, tanggal tidak bertabrakan, status yang tidak memotong kuota).
+- **Fase 3 (TASK-015: Validasi Tanggal dan Jam Operasional Pool):**
+  - Penyempurnaan modul backend `wp-content/plugins/ryokourent-core/includes/booking.php`:
+    - Menegakkan batas jam pelayanan serah terima unit di pool secara ketat antara pukul 07:00 – 23:00 WIB (request jam 02:00 WIB atau di luar jam buka otomatis diblokir dengan kode `invalid_schedule` dan HTTP 400).
+    - Memvalidasi pencegahan tanggal di masa lalu (`start_datetime < now_wib`) dengan buffer pengisian form 15 menit.
+    - Menolak pemilihan tanggal selesai yang mendahului atau sama dengan tanggal mulai (`end_datetime <= start_datetime`).
+    - Standardisasi parsing datetime string lintas perangkat seluler (Android & iOS) dengan format ISO `Y-m-d\TH:i`.
+  - Pembaruan formulir publik `wp-content/plugins/ryokourent-core/public/forms.php`:
+    - Menambahkan atribut pembatas HTML5 `min` pada input `start_datetime` dan `end_datetime`.
+  - Pembaruan skrip interaktif `wp-content/plugins/ryokourent-core/assets/js/ryokourent-booking.js`:
+    - Pembaruan dinamis atribut `min` pada input selesai (`endInput.min = startInput.value`).
+    - Validasi instan di browser untuk mencegah tanggal masa lalu dan jam di luar rentang operasional pool 07:00–23:00 WIB.
+    - Pengecekan pada submit formulir untuk mencegah pengiriman jadwal yang tidak sah.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-operating-hours.php` (14 pengujian skenario penolakan jam 02:00 WIB, jam operasional 07:00–23:00 WIB, tanggal masa lalu, tanggal mundur, dan integrasi submission AJAX).
+- **Fase 3 (TASK-014: Kalkulasi Harga Paket Harian, Mingguan, dan Bulanan):**
+  - Pembuatan modul mesin penetapan harga `wp-content/plugins/ryokourent-core/includes/pricing.php`:
+    - Fungsi `ryokourent_calculate_optimal_rental_price()`: menghitung kombinasi paket termurah (*best-rate guarantee*) dari paket bulanan (30 hari), mingguan (7 hari), dan harian (24 jam dengan toleransi 2 jam).
+    - Optimasi diskon otomatis (misal: sewa 6 hari otomatis mengambil paket mingguan Rp 500.000 jika lebih hemat daripada tarif harian Rp 510.000).
+    - Kalkulasi sewa bertingkat (misal: 35 hari terhitung 1 bulan Rp 1.600.000 + 5 hari Rp 425.000 = Rp 2.025.000).
+    - Deteksi motor berharga custom/placeholder (`daily <= 0`) dengan penandaan `requires_consultation => true` dan label `"Konsultasi Admin WA"`.
+    - Pendaftaran endpoint AJAX `ryokourent_get_price_quote` untuk kalkulasi tarif server-authoritative.
+  - Integrasi ke formulir booking di `wp-content/plugins/ryokourent-core/includes/booking.php`: menghitung ulang total tarif secara mutlak di backend tanpa mempercayai data kiriman harga dari browser DevTools.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-pricing-calculation.php` (13 pengujian skenario sewa 1 hari, 3 hari, 7 hari, 35 hari, optimasi 6 hari, dan penanganan motor tanpa harga).
+- **Fase 3 (TASK-013: Kalkulasi Durasi Sewa & Jam Operasional):**
+  - Penambahan fungsi kalkulasi durasi dan jadwal server-side `ryokourent_validate_rental_schedule()` pada `wp-content/plugins/ryokourent-core/includes/booking.php`:
+    - Menghitung durasi jam presisi dalam zona waktu `Asia/Jakarta` (WIB).
+    - Menerapkan aturan toleransi keterlambatan (*overtime*) 2 jam: hingga 26 jam terhitung 1 hari, 26.5 jam terhitung 2 hari, dan 56.5 jam terhitung 3 hari.
+    - Menegakkan batas jam operasional serah terima unit (07:00 – 23:00 WIB) baik untuk waktu mulai maupun waktu selesai.
+    - Menolak rentang waktu tidak valid (`end <= start`) dan durasi sewa di bawah 1 jam.
+    - Mendaftarkan endpoint AJAX `ryokourent_calculate_duration` untuk perhitungan durasi real-time.
+  - Pembaruan skrip interaktif `wp-content/plugins/ryokourent-core/assets/js/ryokourent-booking.js`:
+    - Event listener instan pada input `#start_datetime` dan `#end_datetime`.
+    - Pengecekan client-side jam operasional 07:00–23:00 WIB dan validasi rentang tanggal.
+    - Pembaruan label UI `#ryokou-live-duration` ("X Hari (~Y Jam)") secara instan serta pembaruan kartu kalkulasi biaya.
+    - Intersepsi pencegahan submit form jika jadwal sewa berada di luar jam operasional.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-duration-calculation.php` (17 pengujian skenario durasi, toleransi 2 jam, jam operasional, dan rentang tanggal).
+- **Fase 3 (TASK-012: Validasi Data Pelanggan & Anti-Spam):**
+  - Pembuatan modul server-side `wp-content/plugins/ryokourent-core/includes/booking.php`:
+    - Validasi identitas pelanggan sesuai e-KTP (nama minimal 3 karakter, alamat KTP, alamat menginap di Malang/Batu).
+    - Normalisasi dan validasi nomor seluler Indonesia (`08...` / `628...`, 10–15 digit) via `ryokourent_is_valid_phone()`.
+    - Pengecekan ketat kontak darurat keluarga: wajib valid dan dilarang sama dengan nomor WhatsApp penyewa.
+    - Anti-Spam Honeypot: field `ryokourent_hp` otomatis memblokir bot spam dengan kode status HTTP 400 (`spam_bot_detected`).
+    - Pembatasan laju pengiriman (*rate-limiting*): menggunakan transient berbasis IP hash (maksimal 5 percobaan dalam 10 menit, kode status HTTP 429).
+    - Pendaftaran endpoint AJAX publik `ryokourent_submit_booking` dengan proteksi token nonce CSRF.
+  - Pembuatan script interaktif `wp-content/plugins/ryokourent-core/assets/js/ryokourent-booking.js`:
+    - Validasi client-side instan (real-time saat input/blur) untuk nomor WhatsApp, kontak darurat keluarga terpisah, nama, dan alamat.
+    - Pengiriman formulir berbasis AJAX `fetch()` dengan indikator status loading pada tombol submit, penanda visual `.has-error`, dan perenderan pesan alert error `.ryokou-form-alert`.
+  - Pendaftaran dan enqueue aset `ryokourent-booking` script dan lokalisasi konfigurasi pada `wp-content/plugins/ryokourent-core/public/shortcodes.php`.
+  - Penambahan styling CSS untuk alert error/sukses dan status input invalid pada `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`.
+  - Pembuatan unit test otomatis `wp-content/plugins/ryokourent-core/tests/test-booking-validation.php`.
+
+### Fixed
+- **Fatal Error Redeclaration `ryokourent_get_booking_statuses()`:**
+  - Menyelesaikan konflik fatal PHP akibat deklarasi ganda fungsi `ryokourent_get_booking_statuses()` pada `includes/helpers.php` dan `includes/post-types.php`.
+  - Memusatkan definisi lengkap dictionary status booking (multidimensi mencakup label, deskripsi, warna, badge class, dan efek kuota) ke dalam `includes/helpers.php` dengan pembungkus guard `if (!function_exists(...))`.
+  - Menghapus deklarasi duplikat pada `includes/post-types.php` dan menambahkan helper `ryokourent_get_booking_status_labels()` untuk kemudahan akses label ringkas.
+  - Memperbarui berkas pengujian `tests/test-cpt-penyewaan.php` dan `tests/test-helpers.php` agar sinkron dengan struktur status terpusat.
+
+## [Unreleased] - 2026-09-30
+
+### Added
+- **Fase 0 (Analisis dan Perencanaan):**
+  - Penyusunan `PROJECT_OVERVIEW.md` mencakup tujuan, target pengguna, ruang lingkup MVP, dan asumsi bisnis.
+  - Penyusunan `ARCHITECTURE.md` mengatur pemisahan plugin `ryokourent-core` dan child theme `generatepress-child`.
+  - Penyusunan `DATA_MODEL.md` mencakup spesifikasi CPT `motor`, CPT `penyewaan`, taxonomy `kategori_motor`, meta fields, 5 status kustom, dan relasi data.
+  - Penyusunan `TASKS.md` merinci 30 task implementasi berurutan dari TASK-001 hingga TASK-030.
+  - Penyusunan `AI_WORKFLOW.md` dan `AI_RULES.md` mengatur pembagian kerja AI, standar git branching, dan batasan operasional.
+  - Penyusunan `DECISIONS.md` mendokumentasikan 7 Architectural Decision Records (ADR-001 s/d ADR-007).
+  - Penyusunan `TESTING.md` memetakan 20 skenario uji (TC-001 s/d TC-020).
+  - Penyusunan `.env.example` dan `CONFIG.example.php`.
+- **Fase 3 (TASK-011: Form Booking Dasar & Interaksi WhatsApp):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/public/forms.php` untuk merender formulir booking HTML5 responsif 3-langkah (pilihan rute & armada, jadwal sewa & kalkulasi durasi, identitas pelanggan sesuai e-KTP), dilengkapi honeypot anti-spam `ryokourent_hp` dan verifikasi nonce `ryokourent_booking_nonce`.
+  - Pendaftaran shortcode `[ryokou_booking_form]` pada `wp-content/plugins/ryokourent-core/public/shortcodes.php`.
+  - Penambahan interaksi dinamis pada `wp-content/plugins/ryokourent-core/assets/js/ryokourent-filter.js`: kuncian rute Bromo otomatis menonaktifkan skutik dan mengunci pilihan motor ke Trail CRF 150L, kalkulasi durasi live dengan toleransi overtime 2 jam, dan penataan draf pesan WhatsApp siap kirim.
+  - Penambahan styling CSS lengkap form booking pada `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css`.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-booking-form.php`.
+- **Fase 3 (TASK-010: Status Booking Kustom):**
+  - Pendaftaran 5 post status kustom internal (`status_menunggu`, `status_dikonfirmasi`, `status_berjalan`, `status_selesai`, `status_dibatalkan`) pada `wp-content/plugins/ryokourent-core/includes/post-types.php` dengan `public => false` dan slug $\le 20$ karakter.
+  - Penyediaan metabox dropdown status pemesanan dengan penanda visual warna pada `wp-content/plugins/ryokourent-core/includes/meta-boxes.php`.
+  - Penerapan filter `wp_insert_post_data` untuk mencegah WordPress me-reset status kustom kembali ke draft saat diedit dari WP-Admin.
+- **Fase 3 (TASK-009: Custom Post Type Penyewaan & RBAC):**
+  - Pendaftaran CPT `penyewaan` internal pada `wp-content/plugins/ryokourent-core/includes/post-types.php` dengan parameter keamanan PII ketat (`public => false`, `publicly_queryable => false`, `exclude_from_search => true`, `show_in_rest => false`).
+  - Pemetaan seluruh kapabilitas CPT ke custom RBAC `manage_ryokourent_bookings`.
+  - Pembuatan panel metabox data identitas pelanggan (nama, nomor WA dengan link direct chat, kontak darurat, alamat KTP, alamat menginap) dan panel rincian armada, jadwal sewa, total tarif, dan alokasi plat nomor unit fisik pada `wp-content/plugins/ryokourent-core/includes/meta-boxes.php`.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-cpt-penyewaan.php`.
+- **Fase 2 (TASK-008: Halaman Detail Motor GeneratePress Child Theme):**
+  - Pembuatan template single post `wp-content/themes/generatepress-child/templates/single-motor.php` dan `single-motor.php` untuk merender informasi lengkap armada: header & breadcrumb navigasi kembali ke katalog, galeri foto, spesifikasi teknis (mesin cc, transmisi, karakter rute, bensin), callout edukasi khusus rute Bromo (peringatan larangan matik vs trail CRF 150L resmi Bromo), fasilitas sewa gratis (2 helm SNI steril, 2 jas hujan setelan, phone holder), dan sticky sidebar tarif resmi (harian toleransi overtime 2 jam, paket mingguan, paket bulanan, syarat sewa cepat, dan WhatsApp CTA).
+  - Pembaruan `wp-content/themes/generatepress-child/functions.php` dengan filter `single_template` dan dynamic stylesheet enqueue.
+  - Penambahan styling CSS responsif modern gelap di `wp-content/themes/generatepress-child/style.css`.
+  - Pembuatan automated unit test `wp-content/plugins/ryokourent-core/tests/test-single-motor.php`.
+- **Fase 2 (TASK-007: Tampilan Katalog Motor & Interaksi):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/public/shortcodes.php` untuk pendaftaran shortcode `[ryokou_catalog]` dengan atribut kustom, enqueue otomatis stylesheet, dan skrip filter.
+  - Pembuatan file `wp-content/plugins/ryokourent-core/public/templates.php` yang menyediakan fungsi render kartu motor (`ryokourent_render_motor_card`), formatting harga harian/mingguan/bulanan, badges ketersediaan & rute Bromo, fallback 7 armada resmi blueprint, dan banner 4 garansi layanan.
+  - Pembuatan file CSS `wp-content/plugins/ryokourent-core/assets/css/ryokourent-public.css` dengan desain mobile-first, high contrast dark theme, floating badges, dan touch-friendly action buttons.
+  - Pembuatan file JS `wp-content/plugins/ryokourent-core/assets/js/ryokourent-filter.js` (vanilla JS tanpa dependensi jQuery) untuk filter tab kategori tanpa reload, empty-state toggling, dan auto-select motor pada form booking.
+  - Pembuatan file automated unit test `wp-content/plugins/ryokourent-core/tests/test-catalog.php`.
+- **Fase 2 (TASK-006: Taxonomy Kategori Motor):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/includes/taxonomies.php` untuk pendaftaran taxonomy hierarkis `kategori_motor` (slug: `kategori-motor`), dukungan Gutenberg Block Editor, proteksi capability RBAC, dan seeding default 3 kategori utama (`beat-series`, `scoopy-vario`, `trail-adventure`) secara idempoten.
+  - Penambahan fungsi pembantu `ryokourent_get_motor_categories()` untuk mempermudah querying kategori di admin dan frontend.
+  - Pembuatan file automated unit test `wp-content/plugins/ryokourent-core/tests/test-taxonomies.php`.
+- **Fase 2 (TASK-005: Field Data Motor & Metabox):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/includes/meta-boxes.php` yang menyediakan 3 panel metabox pada form edit CPT `motor`: panel Spesifikasi & Karakter Rute, panel Tarif Sewa (harian, mingguan, bulanan), dan panel Inventaris Unit Fisik & Plat Nomor.
+  - Penerapan proteksi guard `DOING_AUTOSAVE`, verifikasi nonce `ryokourent_motor_meta_nonce`, dan pembatasan hak akses berbasis role (Operator hanya dapat mengubah spesifikasi, sedangkan perubahan tarif sewa dan kuota fisik internal dikunci hanya untuk Administrator).
+  - Pembuatan file automated unit test `wp-content/plugins/ryokourent-core/tests/test-meta-boxes.php` untuk memverifikasi seluruh skenario keamanan, autosave guard, boundary capability, dan sanitasi data.
+- **Fase 2 (TASK-004: Custom Post Type Motor & Meta Fields):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/includes/post-types.php` untuk pendaftaran CPT `motor` (Armada Motor), dukungan Gutenberg REST API, arsip `motor`, thumbnail, excerpt, dan custom updated messages.
+  - Pembuatan file `wp-content/plugins/ryokourent-core/includes/meta-fields.php` untuk registrasi skema WordPress `register_post_meta()` untuk 10 atribut CPT `motor` (`_ryokou_engine_cc`, `_ryokou_transmission`, `_ryokou_route_character`, `_ryokou_is_bromo_ready`, `_ryokou_price_daily`, `_ryokou_price_weekly`, `_ryokou_price_monthly`, `_ryokou_physical_stock`, `_ryokou_plate_numbers`, `_ryokou_status_label`) dilengkapi fungsi sanitasi dan validasi capability.
+  - Pembuatan file `wp-content/plugins/ryokourent-core/admin/motor-columns.php` untuk kustomisasi tabel daftar armada di WP-Admin (preview foto, spesifikasi mesin, tarif harian berformat Rupiah, kuota unit fisik, badge rute Bromo, badge ketersediaan publik) beserta sortable columns.
+  - Pembuatan file automated test `wp-content/plugins/ryokourent-core/tests/test-cpt-motor.php` untuk pengujian parameter CPT, meta sanitasi, dan kolom admin.
+- **Fase 2 (TASK-003: Plugin Loader & Helper Dasar):**
+  - Pembuatan file `wp-content/plugins/ryokourent-core/includes/helpers.php` yang memuat fungsi utilitas inti: formatting Rupiah (`ryokourent_format_rupiah`), sanitasi & validasi nomor WhatsApp internasional (`ryokourent_sanitize_phone`, `ryokourent_is_valid_phone`), manipulasi waktu zona WIB (`ryokourent_get_timezone`, `ryokourent_get_now_wib`, `ryokourent_format_datetime_id`), perhitungan durasi sewa & toleransi 24 jam (`ryokourent_calculate_duration_hours`, `ryokourent_calculate_rental_days`), validasi jam operasional 07.00-23.00 WIB (`ryokourent_is_within_operating_hours`), sanitasi NIK e-KTP dan plat nomor motor, serta getter status booking dan lokasi pool resmi.
+  - Pembaruan bootstrap loader `wp-content/plugins/ryokourent-core/ryokourent-core.php` untuk memuat helper secara otomatis dan menyiapkan modular autoloading pada hook `plugins_loaded`.
+  - Pembuatan automated unit testing script `wp-content/plugins/ryokourent-core/tests/test-helpers.php` untuk verifikasi fungsi helper secara independen.
+
+  - Inisialisasi struktur repositori resmi dengan `.editorconfig` dan `.phpcs.xml.dist`.
+  - Pembuatan kerangka plugin `wp-content/plugins/ryokourent-core/` beserta file bootstrap, `uninstall.php`, `readme.txt`, dan struktur folder modular (`includes/`, `admin/`, `public/`, `assets/`, `tests/`).
+  - Pembuatan kerangka child theme `wp-content/themes/generatepress-child/` beserta `style.css` dan `functions.php`.
+  - Pembuatan dokumen panduan teknis pada direktori `/docs/` (instalasi lokal, hosting, coding standards, git workflow, checklist pra-merge, dan checklist produksi).
