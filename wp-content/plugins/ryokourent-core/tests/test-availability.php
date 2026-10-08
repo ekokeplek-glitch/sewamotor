@@ -83,12 +83,23 @@ if (!function_exists('get_post_meta')) {
         if ($post_id === 1 && $key === '_ryokou_physical_stock') {
             return 3;
         }
+        if ($post_id === 1 && $key === '_ryokou_plate_numbers') {
+            return "N 1001 AB\nN 1002 CD\nN 1003 EF";
+        }
+        // Motor 2: Honda CRF 150L (Physical Stock = 2)
+        if ($post_id === 2 && $key === '_ryokou_physical_stock') {
+            return 2;
+        }
+        if ($post_id === 2 && $key === '_ryokou_plate_numbers') {
+            return "N 2001 GH\nN 2002 IJ";
+        }
         // Booking metadata mock
         if (isset($GLOBALS['mock_bookings'][$post_id])) {
             $booking = $GLOBALS['mock_bookings'][$post_id];
             if ($key === '_ryokou_booking_motor_id') return $booking['motor_id'];
             if ($key === '_ryokou_booking_start_datetime') return $booking['start'];
             if ($key === '_ryokou_booking_end_datetime') return $booking['end'];
+            if ($key === '_ryokou_booking_allocated_plate') return isset($booking['plate']) ? $booking['plate'] : '';
         }
         return '';
     }
@@ -238,5 +249,45 @@ $GLOBALS['mock_bookings'][105] = array(
 );
 $avail_with_inactive = ryokourent_check_availability(1, '2026-10-06 08:00', '2026-10-08 17:00');
 run_test("Booking dengan status_selesai dan status_dibatalkan tidak mengurangi kuota", $avail_with_inactive === true);
+
+// 8. Test Precise Boundary Conditions (REVIEW-ARCHITECTURE §5 item 5)
+// Booking aktif 101 selesai pada 2026-10-04 12:00:00.
+// Booking baru mulai tepat 2026-10-04 12:00:00 (tidak overlap):
+$avail_exact_touch = ryokourent_check_availability(1, '2026-10-05 15:00:00', '2026-10-06 07:00:00');
+run_test("Jadwal tepat menyentuh batas akhir sewa sebelumnya tidak dihitung bentrok", $avail_exact_touch === true);
+
+// 9. Test Double Booking on Honda CRF 150L (Motor 2, Stok 2)
+$GLOBALS['mock_bookings'][201] = array(
+    'motor_id' => 2,
+    'start'    => '2026-10-10 07:00:00',
+    'end'      => '2026-10-12 17:00:00',
+    'status'   => 'status_dikonfirmasi',
+    'plate'    => 'N 2001 GH',
+);
+$GLOBALS['mock_bookings'][202] = array(
+    'motor_id' => 2,
+    'start'    => '2026-10-10 08:00:00',
+    'end'      => '2026-10-12 18:00:00',
+    'status'   => 'status_berjalan',
+    'plate'    => 'N 2002 IJ',
+);
+// Stok CRF adalah 2, kedua unit sudah booked:
+$avail_crf_full = ryokourent_check_availability(2, '2026-10-10 09:00', '2026-10-11 17:00');
+run_test("CRF 150L dengan 2 booking aktif pada stok 2 menghasilkan available: false", $avail_crf_full === false);
+
+// 10. Test Validasi Alokasi Plat Nomor (M6)
+if (function_exists('ryokourent_validate_allocated_plate')) {
+    // Plat sah terdaftar
+    $valid_plate = ryokourent_validate_allocated_plate(1, 'N 1001 AB', '2026-10-20 08:00:00', '2026-10-22 17:00:00');
+    run_test("Plat terdaftar (N 1001 AB) divalidasi sukses", $valid_plate['valid'] === true);
+
+    // Plat fiktif / tidak terdaftar pada armada motor 1
+    $invalid_plate = ryokourent_validate_allocated_plate(1, 'B 9999 XYZ', '2026-10-20 08:00:00', '2026-10-22 17:00:00');
+    run_test("Plat tidak terdaftar pada model motor ditolak", $invalid_plate['valid'] === false);
+
+    // Plat bentrok: Plat N 2001 GH sudah dialokasikan ke booking 201 pada rentang 2026-10-10 s/d 2026-10-12
+    $clash_plate = ryokourent_validate_allocated_plate(2, 'N 2001 GH', '2026-10-10 10:00:00', '2026-10-11 12:00:00');
+    run_test("Plat yang sedang dipakai di booking aktif lain dideteksi bentrok", $clash_plate['valid'] === false);
+}
 
 echo PHP_EOL . "Hasil: {$pass_count}/{$test_count} pengujian berhasil." . PHP_EOL;

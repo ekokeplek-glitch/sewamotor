@@ -441,11 +441,13 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 * **File yang Dibuat/Diubah:**
   * `wp-content/plugins/ryokourent-core/tests/test-pricing-calculation.php`
   * `wp-content/plugins/ryokourent-core/tests/test-availability.php`
+  * `wp-content/plugins/ryokourent-core/tests/test-qa-matrix.php`
+  * `wp-content/plugins/ryokourent-core/includes/user-roles.php`
   * `TESTING.md`
 * **Dependensi:** TASK-027.
-* **Kriteria Selesai:** Seluruh 18 skenario uji pada `TESTING.md` berstatus PASSED.
-* **Cara Pengujian:** Eksekusi script testing dan verifikasi manual di perangkat HP nyata.
-* **Risiko:** Ketergantungan environment PHP CLI lokal.
+* **Kriteria Selesai:** Seluruh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus PASSED (100%).
+* **Cara Pengujian:** Jalankan unit test `tests/test-pricing-calculation.php`, `tests/test-availability.php`, dan comprehensive test runner `tests/test-qa-matrix.php`. `compile_applet` dan `lint_applet` PASS.
+* **Risiko:** Ketergantungan environment PHP CLI lokal (dijalankan di staging/server XAMPP untuk validasi akhir browser).
 
 ---
 

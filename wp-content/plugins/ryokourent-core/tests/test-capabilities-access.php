@@ -224,6 +224,7 @@ run_test("Role operator memiliki kapabilitas edit_published_motors (mengedit uni
 echo "\n2. Verifikasi Batasan & Proteksi Eksklusif Operator:\n";
 run_test("Operator diizinkan menambah model motor baru (create_motors = true)", $op_role->has_cap('create_motors'));
 run_test("Operator diizinkan menerbitkan/update motor (publish_motors = true)", $op_role->has_cap('publish_motors'));
+run_test("Operator DILARANG menghapus motor satuan (delete_motor = false)", !$op_role->has_cap('delete_motor'));
 run_test("Operator DILARANG menghapus motor (delete_motors = false)", !$op_role->has_cap('delete_motors'));
 run_test("Operator DILARANG menghapus motor milik orang lain (delete_others_motors = false)", !$op_role->has_cap('delete_others_motors'));
 run_test("Operator diizinkan mengunggah foto armada (upload_files = true)", $op_role->has_cap('upload_files'));

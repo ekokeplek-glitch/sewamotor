@@ -59,13 +59,16 @@ function ryokourent_get_operator_capabilities() {
         'read'                       => true,
         'upload_files'               => true,
         'manage_ryokourent_bookings' => true,
+        'read_motor'                 => true,
+        'read_private_motors'        => true,
+        'create_motor'               => true,
+        'create_motors'              => true,
+        'edit_motor'                 => true,
         'edit_motors'                => true,
         'edit_others_motors'         => true,
         'edit_published_motors'      => true,
         'edit_private_motors'        => true,
         'publish_motors'             => true,
-        'read_private_motors'        => true,
-        'create_motors'              => true,
     );
 }
 
@@ -242,6 +245,7 @@ function ryokourent_ensure_operator_capabilities() {
 
     // Cabut secara ketat capability terlarang (hapus motor & manajemen kategori/pengaturan)
     $forbidden = array(
+        'delete_motor',
         'delete_motors',
         'delete_others_motors',
         'delete_published_motors',
@@ -254,8 +258,17 @@ function ryokourent_ensure_operator_capabilities() {
             $role->remove_cap($cap);
         }
     }
+
+    // Segarkan objek current user di memori PHP jika user yang sedang aktif memiliki role operator
+    if (function_exists('wp_get_current_user')) {
+        $current_user = wp_get_current_user();
+        if ($current_user && !empty($current_user->ID) && in_array($slug, (array) $current_user->roles, true)) {
+            $current_user->get_role_caps();
+        }
+    }
 }
 add_action('admin_init', 'ryokourent_ensure_operator_capabilities');
+add_action('init', 'ryokourent_ensure_operator_capabilities', 10);
 
 /**
  * Pembersihan saat deaktivasi plugin.

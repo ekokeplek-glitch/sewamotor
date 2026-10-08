@@ -167,4 +167,29 @@ run_test("Quote sewa Motor 1 tidak membutuhkan konsultasi khusus", $quote_beat['
 $quote_unpriced = ryokourent_calculate_booking_quote(99, '2026-10-02 08:30', '2026-10-04 17:00');
 run_test("Quote motor tanpa harga mengaktifkan requires_consultation = true", $quote_unpriced['requires_consultation'] === true);
 
+// 8. Test 14 Days Rental (2 Weekly Packages)
+$res_14d = ryokourent_calculate_optimal_rental_price(14, $daily_85k, $weekly_500k, $monthly_16m);
+run_test("Sewa 14 hari: Total harga Rp 1.000.000 (2 Paket Mingguan)", $res_14d['total_price'] === 1000000);
+run_test("Sewa 14 hari: Breakdown mingguan = 2, harian = 0", $res_14d['breakdown']['weekly_count'] === 2 && $res_14d['breakdown']['daily_count'] === 0);
+
+// 9. Test 30 Days Rental (1 Monthly Package)
+$res_30d = ryokourent_calculate_optimal_rental_price(30, $daily_85k, $weekly_500k, $monthly_16m);
+run_test("Sewa 30 hari: Total harga Rp 1.600.000 (1 Paket Bulanan)", $res_30d['total_price'] === 1600000);
+run_test("Sewa 30 hari: Breakdown bulanan = 1, harian = 0", $res_30d['breakdown']['monthly_count'] === 1 && $res_30d['breakdown']['daily_count'] === 0);
+
+// 10. Test 37 Days Rental (1 Month + 1 Week combination)
+$res_37d = ryokourent_calculate_optimal_rental_price(37, $daily_85k, $weekly_500k, $monthly_16m);
+// 1 bulan (1.600.000) + 1 minggu (500.000) = 2.100.000 (lebih murah dari 1 bulan + 7 hari = 2.195.000)
+run_test("Sewa 37 hari: Mengambil 1 Bulan + 1 Minggu Rp 2.100.000", $res_37d['total_price'] === 2100000);
+run_test("Sewa 37 hari: Breakdown bulanan = 1, mingguan = 1, harian = 0", $res_37d['breakdown']['monthly_count'] === 1 && $res_37d['breakdown']['weekly_count'] === 1 && $res_37d['breakdown']['daily_count'] === 0);
+
+// 11. Test Honda Trail CRF 150L Bromo Trip (Motor 2)
+$quote_crf = ryokourent_calculate_booking_quote(2, '2026-10-10 07:00', '2026-10-13 07:00');
+run_test("Sewa CRF 150L 3 hari: Total harga Rp 600.000 (3 x 200.000)", $quote_crf['total_price'] === 600000);
+run_test("Sewa CRF 150L 3 hari: Format Rupiah Rp 600.000", $quote_crf['formatted_price'] === 'Rp 600.000');
+
+// 12. Test Currency Formatting
+run_test("ryokourent_format_rupiah memformat 255000 menjadi 'Rp 255.000'", ryokourent_format_rupiah(255000) === 'Rp 255.000');
+run_test("ryokourent_format_rupiah memformat 0 menjadi 'Rp 0'", ryokourent_format_rupiah(0) === 'Rp 0');
+
 echo PHP_EOL . "Hasil: {$pass_count}/{$test_count} pengujian berhasil." . PHP_EOL;

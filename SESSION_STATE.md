@@ -6,10 +6,11 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 
 ## 1. Status Sesi Saat Ini
 * **Tanggal / Waktu:** 2026-10-08
-* **Cabang Git Aktif:** `feature/security-hardening` (dibuat dari `develop`)
+* **Cabang Git Aktif:** `feature/automated-and-manual-testing` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/automated-and-manual-testing` (Fitur pengujian otomatis, matriks QA 20 skenario, unit test kalkulasi tarif & ketersediaan kuota, serta ketahanan role operator di XAMPP)
   - `feature/security-hardening` (Fitur audit keamanan, direct file access guards, sanitasi input, mitigasi DoS unbounded query, proteksi nonce, dan RBAC)
   - `feature/business-rules-and-admin-controls` (Pembaruan aturan hak akses operator, perpanjangan sewa +24 jam, cancel booking admin dengan alasan, denda overtime manual, dan rute ekstrem Trail Bromo/Cangar/Pantai)
   - `feature/mobile-responsive-optimization` (Fitur optimasi antarmuka seluler, floating mobile bar, dan ergonomi thumb zone)
@@ -26,9 +27,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `TASK-027: Buat Validasi Keamanan (Security Hardening)`
-* **Status Task Terakhir:** **DONE (SELESAI)** - Seluruh 27 berkas PHP ber-guard direct access, sanitasi XSS/SQLi ketat, unbounded query tereliminasi, `compile_applet` & `lint_applet` PASS.
-* **Task Selanjutnya:** `TASK-028: Buat Pengujian Manual dan Otomatis` (Menunggu instruksi lanjutan dari pengguna)
+* **Task Terakhir Selesai:** `TASK-028: Buat Pengujian Manual dan Otomatis`
+* **Status Task Terakhir:** **DONE (SELESAI)** - Seluruh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus **PASSED** (100%), unit test kalkulasi tarif `test-pricing-calculation.php` (20/20 PASS), ketersediaan unit `test-availability.php` (12/12 PASS), dan comprehensive runner `test-qa-matrix.php` (20/20 PASS).
+* **Task Selanjutnya:** `TASK-029: Buat Dokumentasi Admin & SOP Operator` (Menunggu instruksi lanjutan dari pengguna)
 
 ---
 
@@ -63,11 +64,35 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 | **TASK-025** | Buat Halaman FAQ dan Lokasi Pool | FASE 4 | **DONE** | TASK-007, TASK-024 | 2026-10-07 |
 | **TASK-026** | Buat Responsive Design & Mobile-First Optimization | FASE 4 | **DONE** | TASK-011, TASK-025 | 2026-10-07 |
 | **TASK-027** | Buat Validasi Keamanan (Security Hardening) | FASE 4 | **DONE** | TASK-002 s/d TASK-026 | 2026-10-08 |
-| **TASK-028** | Buat Pengujian Manual dan Otomatis | FASE 4 | PENDING | TASK-027 | - |
+| **TASK-028** | Buat Pengujian Manual dan Otomatis | FASE 4 | **DONE** | TASK-027 | 2026-10-08 |
+| **TASK-029** | Buat Dokumentasi Admin & SOP Operator | FASE 4 | PENDING | TASK-023, TASK-024 | - |
 
 ---
 
-## 3. Komponen yang Telah Diimplementasikan pada TASK-027
+## 3. Komponen yang Telah Diimplementasikan pada TASK-028
+1. **Matriks Pengujian QA Lengkap (20 Skenario di `TESTING.md`):**
+   - Seluruh 20 skenario uji (TC-001 s/d TC-020) berstatus **PASSED** (100% lolos verifikasi).
+   - Meliputi integritas aktivasi plugin, registrasi CPT motor, persistensi post meta teknis & harga, proteksi isolasi kuota internal dari frontend/REST, filter katalog instan mobile-first, penolakan input form kosong, validasi regex seluler Indonesia, pemisahan mutlak nomor darurat keluarga, validasi tanggal kronologis, jam operasional pool 07:00-23:00 WIB, proteksi keselamatan rute Bromo Honda CRF 150L, kalkulasi durasi sewa dengan grace period overtime 2 jam, kalkulasi tarif harian/mingguan/bulanan bergaransi termurah, deteksi ketersediaan kuota, pencegahan double booking atomik, penyimpanan CPT penyewaan & kode unik RYK-..., pembentukan deep link WhatsApp resmi berformat RFC 3986 `rawurlencode`, pembatasan hak operator & pemblokiran HTTP 403 server-side, quick action perubahan status booking & validasi plat nomor fisik, serta audit responsivitas mobile (thumb-zone & touch target >= 48px).
+2. **Penyempurnaan Unit Test Kalkulasi Tarif (`tests/test-pricing-calculation.php`):**
+   - Penambahan uji paket mingguan 14 hari (2 x 500k = Rp 1.000.000).
+   - Penambahan uji paket bulanan 30 hari (Rp 1.600.000).
+   - Penambahan uji kombinasi termurah 37 hari (1 bulan + 1 minggu = Rp 2.100.000 vs 1 bulan + 7 hari = Rp 2.195.000).
+   - Penambahan uji unit Honda Trail CRF 150L (3 hari = Rp 600.000).
+   - Penambahan uji format Rupiah Indonesia (`ryokourent_format_rupiah`).
+3. **Penyempurnaan Unit Test Ketersediaan Armada (`tests/test-availability.php`):**
+   - Penambahan pengujian kondisi batas presisi (touch boundary condition) jadwal sewa baru yang tepat menyentuh batas akhir sewa sebelumnya tidak dihitung bentrok.
+   - Penambahan uji double booking Honda Trail CRF 150L stok 2 unit penuh.
+   - Penambahan uji validasi alokasi plat nomor fisik (`ryokourent_validate_allocated_plate`) mendeteksi plat sah, menolak plat fiktif, dan mendeteksi tabrakan plat aktif lain.
+4. **Automated QA Matrix Runner (`tests/test-qa-matrix.php`):**
+   - Pengujian terpadu yang mengeksekusi otomatis 20 assertion untuk skenario TC-001 hingga TC-020.
+5. **Ketahanan Hak Akses Operator di Lingkungan Lokal XAMPP (`includes/user-roles.php`):**
+   - Whitelist capability operator dilengkapi dengan `read_motor`, `edit_motor`, `create_motor`, `create_motors`, `edit_motors`, `edit_others_motors`, `edit_published_motors`, `publish_motors`, `upload_files`.
+   - Pencabutan eksplisit kapabilitas `delete_motor`, `delete_motors`, `delete_others_motors`, `delete_published_motors`, `manage_ryokourent_settings`, `manage_options`.
+   - Sinkronisasi instan objek `$current_user` di memori PHP via `$current_user->get_role_caps()` dan pendaftaran hook sinkronisasi pada `init` dan `admin_init` agar perubahan di XAMPP langsung aktif tanpa perlu re-login atau re-aktivasi plugin.
+
+---
+
+## 4. Komponen yang Telah Diimplementasikan pada TASK-027
 1. **Direct File Execution Guards (`defined('ABSPATH') || exit;`):**
    - Audit 100% berkas PHP di plugin `ryokourent-core` dan subdirektori (`admin/`, `includes/`, `public/`, `assets/`, `tests/`).
    - Penambahan guard `if (!defined('ABSPATH')) { exit; }` pada seluruh file `index.php` (silence is golden) untuk mencegah eksekusi langsung via browser HTTP.

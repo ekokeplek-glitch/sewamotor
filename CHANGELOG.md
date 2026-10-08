@@ -8,6 +8,28 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-08
 
 ### Added
+- **Fase 4 (TASK-028: Buat Pengujian Manual dan Otomatis / QA Testing Matrix):**
+  - **Matriks Pengujian QA (20 Skenario):**
+    - Verifikasi penuh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus **PASSED** (100%).
+    - Pencatatan hasil aktual dan kriteria keberhasilan pada masing-masing skenario uji dari aktivasi plugin, sanitasi form, validasi kontak terpisah, aturan Bromo CRF 150L, toleransi overtime, pencegahan double booking atomik, deep link WhatsApp, RBAC operator vs admin, hingga ergonomi sentuh mobile 48px.
+  - **Penyempurnaan Unit Test Kalkulasi Tarif (`tests/test-pricing-calculation.php`):**
+    - Penambahan skenario sewa 14 hari (2 paket mingguan = Rp 1.000.000).
+    - Penambahan skenario sewa 30 hari (1 paket bulanan = Rp 1.600.000).
+    - Penambahan skenario kombinasi termurah 37 hari (1 bulan + 1 minggu = Rp 2.100.000).
+    - Penambahan pengujian unit trip Bromo Honda Trail CRF 150L (3 hari = Rp 600.000).
+    - Pengujian pemformatan mata uang Rupiah Indonesia (`ryokourent_format_rupiah`).
+  - **Penyempurnaan Unit Test Ketersediaan Armada (`tests/test-availability.php`):**
+    - Pengujian boundary condition presisi waktu sewa menyentuh batas akhir (REVIEW-ARCHITECTURE.md §5 item 5).
+    - Pengujian skenario double booking Honda Trail CRF 150L stok 2 unit penuh.
+    - Pengujian validasi plat nomor fisik (`ryokourent_validate_allocated_plate`) mendeteksi plat terdaftar, plat fiktif, dan tabrakan plat ganda.
+  - **Automated QA Matrix Runner (`tests/test-qa-matrix.php`):**
+    - Pembuatan skrip automated runner yang mengeksekusi 20 pengujian unit untuk seluruh skenario TC-001 s/d TC-020 secara otomatis.
+  - **Penyempurnaan Hak Akses Operator & Ketahanan XAMPP (`includes/user-roles.php`):**
+    - Penambahan capability motor eksplisit (`read_motor`, `edit_motor`, `create_motor`) di whitelist operator.
+    - Pencabutan eksplisit kapabilitas terlarang (`delete_motor`, `delete_motors`, dll).
+    - Penyegaran otomatis objek `$current_user` di memori PHP pada pemanggilan `ryokourent_ensure_operator_capabilities()`.
+    - Pendaftaran hook sinkronisasi otomatis pada `init` dan `admin_init` sehingga sistem langsung menyelaraskan diri di instalasi lokal XAMPP.
+
 - **Fase 4 (TASK-027: Buat Validasi Keamanan / Security Hardening):**
   - **Pencegahan Eksekusi Langsung File PHP (Direct File Execution Guards):**
     - Audit 100% berkas PHP di plugin `ryokourent-core` dan subdirektori (`admin/`, `includes/`, `public/`, `assets/`, `tests/`).
