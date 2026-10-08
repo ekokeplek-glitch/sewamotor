@@ -40,26 +40,32 @@ function ryokourent_get_operator_role_slug() {
  * @return string
  */
 function ryokourent_get_roles_version() {
-    return '2';
+    return '3';
 }
 
 /**
  * Daftar capability yang BOLEH dimiliki operator (whitelist mutlak).
  * Sesuai aturan operasional terkini:
- * - Boleh: melihat dan mengedit motor eksisting (spesifikasi, tarif sewa harian/mingguan/bulanan, stok unit fisik & plat nomor).
- * - Dilarang: menghapus motor (delete_*), menambah/menghapus kategori motor (manage_ryokourent_settings / taxonomies),
- *   serta konfigurasi global website (manage_options).
- * Capability lain di role ini dianggap tidak sah dan akan dicabut saat sinkronisasi.
+ * - Boleh: akses penuh armada motor (melihat, menambah model motor baru, mengedit spesifikasi,
+ *   tarif sewa harian/mingguan/bulanan, stok unit fisik & plat nomor, serta upload foto armada).
+ * - Dilarang: menghapus motor (delete_* mutlak dicabut/tidak diberikan),
+ *   serta menambah/mengedit/menghapus kategori motor (kategori_motor dikunci ke manage_ryokourent_settings).
+ * Capability lain di luar whitelist ini dianggap tidak sah dan akan dicabut saat sinkronisasi.
  *
  * @return array<string,bool>
  */
 function ryokourent_get_operator_capabilities() {
     return array(
         'read'                       => true,
+        'upload_files'               => true,
         'manage_ryokourent_bookings' => true,
         'edit_motors'                => true,
         'edit_others_motors'         => true,
         'edit_published_motors'      => true,
+        'edit_private_motors'        => true,
+        'publish_motors'             => true,
+        'read_private_motors'        => true,
+        'create_motors'              => true,
     );
 }
 
@@ -207,6 +213,49 @@ function ryokourent_maybe_sync_operator_role() {
     ryokourent_install_operator_role();
 }
 add_action('init', 'ryokourent_maybe_sync_operator_role', 5);
+
+/**
+ * Memastikan role operator selalu memiliki capability terkini pada admin_init.
+ * Sangat krusial untuk instalasi lokal (seperti XAMPP) di mana file plugin diperbarui
+ * tanpa admin melakukan re-aktivasi plugin secara manual.
+ *
+ * @return void
+ */
+function ryokourent_ensure_operator_capabilities() {
+    if (!function_exists('get_role')) {
+        return;
+    }
+
+    $slug = ryokourent_get_operator_role_slug();
+    $role = get_role($slug);
+    if (!$role) {
+        ryokourent_register_operator_role();
+        return;
+    }
+
+    $allowed = ryokourent_get_operator_capabilities();
+    foreach ($allowed as $cap => $grant) {
+        if (empty($role->capabilities[$cap])) {
+            $role->add_cap($cap, $grant);
+        }
+    }
+
+    // Cabut secara ketat capability terlarang (hapus motor & manajemen kategori/pengaturan)
+    $forbidden = array(
+        'delete_motors',
+        'delete_others_motors',
+        'delete_published_motors',
+        'delete_private_motors',
+        'manage_ryokourent_settings',
+        'manage_options',
+    );
+    foreach ($forbidden as $cap) {
+        if (!empty($role->capabilities[$cap])) {
+            $role->remove_cap($cap);
+        }
+    }
+}
+add_action('admin_init', 'ryokourent_ensure_operator_capabilities');
 
 /**
  * Pembersihan saat deaktivasi plugin.

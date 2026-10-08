@@ -222,12 +222,12 @@ run_test("Role operator memiliki kapabilitas edit_others_motors (mengedit unit y
 run_test("Role operator memiliki kapabilitas edit_published_motors (mengedit unit yang terbit)", $op_role->has_cap('edit_published_motors'));
 
 echo "\n2. Verifikasi Batasan & Proteksi Eksklusif Operator:\n";
-run_test("Operator DILARANG menambah model baru (create_motors = false)", !$op_role->has_cap('create_motors'));
-run_test("Operator DILARANG menerbitkan motor baru (publish_motors = false)", !$op_role->has_cap('publish_motors'));
+run_test("Operator diizinkan menambah model motor baru (create_motors = true)", $op_role->has_cap('create_motors'));
+run_test("Operator diizinkan menerbitkan/update motor (publish_motors = true)", $op_role->has_cap('publish_motors'));
 run_test("Operator DILARANG menghapus motor (delete_motors = false)", !$op_role->has_cap('delete_motors'));
 run_test("Operator DILARANG menghapus motor milik orang lain (delete_others_motors = false)", !$op_role->has_cap('delete_others_motors'));
-run_test("Operator DILARANG mengunggah berkas baru (upload_files = false)", !$op_role->has_cap('upload_files'));
-run_test("Operator DILARANG mengubah pengaturan & tarif (manage_ryokourent_settings = false)", !$op_role->has_cap('manage_ryokourent_settings'));
+run_test("Operator diizinkan mengunggah foto armada (upload_files = true)", $op_role->has_cap('upload_files'));
+run_test("Operator DILARANG mengubah pengaturan global & kelola kategori (manage_ryokourent_settings = false)", !$op_role->has_cap('manage_ryokourent_settings'));
 
 echo "\n3. Verifikasi Kapabilitas Lengkap Administrator:\n";
 run_test("Administrator memiliki manage_ryokourent_settings", $admin_role->has_cap('manage_ryokourent_settings'));
@@ -303,9 +303,9 @@ ryokourent_save_motor_meta_data($post_id);
 
 run_test("Operator diizinkan menyimpan spesifikasi teknis (CC)", 125 === ($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_engine_cc'] ?? null));
 run_test("Operator diizinkan menyimpan karakter rute", 'Nyaman untuk Kota Batu' === ($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_route_character'] ?? null));
-run_test("Operator DIBLOKIR memodifikasi tarif harian (tetap kosong/aman)", empty($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_price_daily']));
-run_test("Operator DIBLOKIR memodifikasi stok fisik armada (tetap kosong/aman)", empty($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_physical_stock']));
-run_test("Operator DIBLOKIR memodifikasi daftar plat nomor (tetap kosong/aman)", empty($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_plate_numbers']));
+run_test("Operator diizinkan memodifikasi tarif harian", 99999 === ($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_price_daily'] ?? null));
+run_test("Operator diizinkan memodifikasi stok fisik armada", 50 === ($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_physical_stock'] ?? null));
+run_test("Operator diizinkan memodifikasi daftar plat nomor", !empty($GLOBALS['mock_post_meta_db'][$post_id]['_ryokou_plate_numbers']));
 
 echo "\n-----------------------------------------------------------------\n";
 echo "HASIL: {$pass_count}/{$test_count} pengujian berhasil.\n";

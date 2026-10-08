@@ -87,11 +87,14 @@ function ryokourent_activate_plugin() {
 register_activation_hook(__FILE__, 'ryokourent_activate_plugin');
 
 /**
- * Ensure administrator role always has Ryokourent custom capabilities.
+ * Ensure administrator and operator roles always have Ryokourent custom capabilities.
  */
 function ryokourent_ensure_admin_capabilities() {
     if (function_exists('ryokourent_grant_admin_capabilities') && current_user_can('manage_options')) {
         ryokourent_grant_admin_capabilities();
+    }
+    if (function_exists('ryokourent_ensure_operator_capabilities')) {
+        ryokourent_ensure_operator_capabilities();
     }
 }
 add_action('admin_init', 'ryokourent_ensure_admin_capabilities');

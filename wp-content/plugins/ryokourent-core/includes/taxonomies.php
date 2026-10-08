@@ -62,7 +62,7 @@ function ryokourent_register_taxonomies() {
             'manage_terms' => 'manage_ryokourent_settings',
             'edit_terms'   => 'manage_ryokourent_settings',
             'delete_terms' => 'manage_ryokourent_settings',
-            'assign_terms' => 'edit_posts',
+            'assign_terms' => 'edit_motors',
         ),
     );
 

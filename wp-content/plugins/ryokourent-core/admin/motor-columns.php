@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
  * @return array Modified columns array.
  */
 function ryokourent_motor_columns($columns) {
-    if (!current_user_can('edit_posts')) {
+    if (!current_user_can('edit_motors') && !current_user_can('edit_posts')) {
         return $columns;
     }
 
@@ -75,7 +75,7 @@ add_filter('manage_motor_posts_columns', 'ryokourent_motor_columns');
  * @return void
  */
 function ryokourent_motor_custom_column_content($column, $post_id) {
-    if (!current_user_can('edit_posts')) {
+    if (!current_user_can('edit_motors') && !current_user_can('edit_posts')) {
         return;
     }
 
@@ -178,7 +178,7 @@ add_action('manage_motor_posts_custom_column', 'ryokourent_motor_custom_column_c
  * @return array Modified sortable columns.
  */
 function ryokourent_motor_sortable_columns($sortable_columns) {
-    if (!current_user_can('edit_posts')) {
+    if (!current_user_can('edit_motors') && !current_user_can('edit_posts')) {
         return $sortable_columns;
     }
 
@@ -201,7 +201,7 @@ function ryokourent_motor_columns_orderby($query) {
         return;
     }
 
-    if (!current_user_can('edit_posts')) {
+    if (!current_user_can('edit_motors') && !current_user_can('edit_posts')) {
         return;
     }
 
