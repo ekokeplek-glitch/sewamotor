@@ -8,6 +8,11 @@
  * @since   1.0.0
  */
 
+// Exit if accessed directly.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 // Route to template partial
 $template = locate_template(array('templates/template-faq-pool.php'));
 if ($template) {
