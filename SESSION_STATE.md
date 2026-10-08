@@ -6,10 +6,11 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 
 ## 1. Status Sesi Saat Ini
 * **Tanggal / Waktu:** 2026-10-08
-* **Cabang Git Aktif:** `feature/automated-and-manual-testing` (dibuat dari `develop`)
+* **Cabang Git Aktif:** `feature/operator-manual-and-admin-guide` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/operator-manual-and-admin-guide` (Fitur dokumentasi operasional SOP operator dan buku panduan sistem administrator)
   - `feature/automated-and-manual-testing` (Fitur pengujian otomatis, matriks QA 20 skenario, unit test kalkulasi tarif & ketersediaan kuota, serta ketahanan role operator di XAMPP)
   - `feature/security-hardening` (Fitur audit keamanan, direct file access guards, sanitasi input, mitigasi DoS unbounded query, proteksi nonce, dan RBAC)
   - `feature/business-rules-and-admin-controls` (Pembaruan aturan hak akses operator, perpanjangan sewa +24 jam, cancel booking admin dengan alasan, denda overtime manual, dan rute ekstrem Trail Bromo/Cangar/Pantai)
@@ -27,9 +28,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `TASK-028: Buat Pengujian Manual dan Otomatis`
-* **Status Task Terakhir:** **DONE (SELESAI)** - Seluruh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus **PASSED** (100%), unit test kalkulasi tarif `test-pricing-calculation.php` (20/20 PASS), ketersediaan unit `test-availability.php` (12/12 PASS), dan comprehensive runner `test-qa-matrix.php` (20/20 PASS).
-* **Task Selanjutnya:** `TASK-029: Buat Dokumentasi Admin & SOP Operator` (Menunggu instruksi lanjutan dari pengguna)
+* **Task Terakhir Selesai:** `TASK-029: Buat Dokumentasi Admin & SOP Operator`
+* **Status Task Terakhir:** **DONE (SELESAI)** - Dokumen operasional resmi `docs/OPERATOR_MANUAL.md` (9 bagian SOP lapangan lengkap) dan `docs/ADMIN_GUIDE.md` (8 modul panduan manajemen dan teknis) telah selesai disusun dengan bahasa yang jelas dan mudah dipahami staf non-teknis.
+* **Task Selanjutnya:** `TASK-030: Buat Panduan Deployment & Checklist Produksi` (Menunggu instruksi lanjutan dari pengguna)
 
 ---
 
@@ -65,11 +66,35 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 | **TASK-026** | Buat Responsive Design & Mobile-First Optimization | FASE 4 | **DONE** | TASK-011, TASK-025 | 2026-10-07 |
 | **TASK-027** | Buat Validasi Keamanan (Security Hardening) | FASE 4 | **DONE** | TASK-002 s/d TASK-026 | 2026-10-08 |
 | **TASK-028** | Buat Pengujian Manual dan Otomatis | FASE 4 | **DONE** | TASK-027 | 2026-10-08 |
-| **TASK-029** | Buat Dokumentasi Admin & SOP Operator | FASE 4 | PENDING | TASK-023, TASK-024 | - |
+| **TASK-029** | Buat Dokumentasi Admin & SOP Operator | FASE 4 | **DONE** | TASK-023, TASK-024 | 2026-10-08 |
+| **TASK-030** | Buat Panduan Deployment & Checklist Produksi | FASE 4 | PENDING | TASK-028, TASK-029 | - |
 
 ---
 
-## 3. Komponen yang Telah Diimplementasikan pada TASK-028
+## 3. Komponen yang Telah Diimplementasikan pada TASK-029
+1. **Buku Panduan Operator & SOP Lapangan (`docs/OPERATOR_MANUAL.md`):**
+   - Batasan hak akses role Operator: Hak mengelola booking, armada, dan tarif motor, dengan larangan mutlak menghapus motor dan larangan memanipulasi kategori motor atau pengaturan global website.
+   - SOP 1: Respon cepat konfirmasi pesanan WhatsApp dengan standar SLA < 5 menit dan panduan membedah draf pesan resmi kode unik `RYK-...`.
+   - SOP 2: Verifikasi ketat 3 dokumen persyaratan (e-KTP asli fisik wajib titip, SIM C / paspor, identitas kerja/mahasiswa/BPJS/KK), validasi akun medsos aktif, kontak darurat keluarga independen, dan perlindungan privasi data pelanggan (UU PDP No. 27/2022).
+   - SOP 3: Verifikasi rute perjalanan Malang Kota vs Rute Ekstrem Bromo/Cangar/Pantai Selatan. Penegakan larangan motor matik ke Bromo dan edukasi wajib unit Trail Honda CRF 150L, serta kepatuhan batas wilayah Malang Raya.
+   - SOP 4: Alur status transaksi di WP-Admin (Menunggu -> Dikonfirmasi -> Berjalan -> Selesai) dan validasi alokasi plat nomor fisik bebas bentrok.
+   - SOP 5: Penanganan toleransi keterlambatan (overtime grace period 2 jam gratis), penagihan denda manual > 2 jam, dan prosedur perpanjangan masa sewa (+24 jam).
+   - SOP 6: Prosedur serah terima unit di 2 pool resmi (Pool Dinoyo & Pool Batu) dan layanan antar-jemput stasiun/hotel dengan checklist fisik 4 sisi bodi dan fasilitas 2 helm + 2 jas hujan.
+   - SOP 7: Prosedur pengembalian unit, pelunasan, pengembalian e-KTP fisik, dan penutupan status transaksi.
+   - Bagian 9: Prosedur darurat (kunci hilang, ban bocor, kecelakaan ringan, kendala mesin mogok, dan penyewa hilang kontak).
+2. **Panduan Administrator & Pengelola Sistem (`docs/ADMIN_GUIDE.md`):**
+   - Matriks RBAC Administrator vs Operator vs Pengunjung publik.
+   - Panduan konfigurasi nomor WhatsApp resmi perusahaan dan jam operasional pool (07:00 - 23:00 WIB).
+   - Panduan pengelolaan tarif dan eksekusi Penyesuaian Harga Massal (*Bulk Price Adjustment*) peak season liburan dengan mekanisme keamanan *two-pass rollback*.
+   - Manajemen katalog armada, total stok unit fisik tertutup (`_ryokou_physical_stock`), dan normalisasi format daftar plat kendaraan (`_ryokou_plate_numbers`).
+   - Panduan penggunaan Dashboard Operasional dan pemantauan metrik sewa harian & sebaran pool.
+   - Prosedur pembatalan pesanan resmi oleh Admin (*Cancel Booking*) disertai catatan alasan pembatalan dan pelepasan kuota otomatis.
+   - Prosedur pembuatan akun staf Operator baru dengan prinsip *Least Privilege* dan prosedur offboarding aman.
+   - Kepatuhan UU Perlindungan Data Pribadi (UU PDP No. 27/2022) pada data CPT `penyewaan` serta jadwal pencadangan rutin (*daily MySQL & weekly uploads backup*).
+
+---
+
+## 4. Komponen yang Telah Diimplementasikan pada TASK-028
 1. **Matriks Pengujian QA Lengkap (20 Skenario di `TESTING.md`):**
    - Seluruh 20 skenario uji (TC-001 s/d TC-020) berstatus **PASSED** (100% lolos verifikasi).
    - Meliputi integritas aktivasi plugin, registrasi CPT motor, persistensi post meta teknis & harga, proteksi isolasi kuota internal dari frontend/REST, filter katalog instan mobile-first, penolakan input form kosong, validasi regex seluler Indonesia, pemisahan mutlak nomor darurat keluarga, validasi tanggal kronologis, jam operasional pool 07:00-23:00 WIB, proteksi keselamatan rute Bromo Honda CRF 150L, kalkulasi durasi sewa dengan grace period overtime 2 jam, kalkulasi tarif harian/mingguan/bulanan bergaransi termurah, deteksi ketersediaan kuota, pencegahan double booking atomik, penyimpanan CPT penyewaan & kode unik RYK-..., pembentukan deep link WhatsApp resmi berformat RFC 3986 `rawurlencode`, pembatasan hak operator & pemblokiran HTTP 403 server-side, quick action perubahan status booking & validasi plat nomor fisik, serta audit responsivitas mobile (thumb-zone & touch target >= 48px).

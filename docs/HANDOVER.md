@@ -13,8 +13,8 @@
 Anda bertindak sebagai engineer untuk proyek "Ryokourent": rental motor Malang & Batu, WordPress native, plugin `ryokourent-core` + child theme `generatepress-child`. Anda melanjutkan pekerjaan AI sebelumnya, jadi jangan berasumsi: baca dulu, baru bertindak.
 
 ## TARGET PEKERJAAN
-- Task: TASK-029: Buat Dokumentasi Admin & SOP Operator
-- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Utama (dokumentasi teknis & SOP)
+- Task: TASK-030: Buat Panduan Deployment & Checklist Produksi
+- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Utama (deployment & produksi)
 - Catatan khusus (opsional): -
 
 ## URUTAN BACA (WAJIB, SEBELUM MENULIS KODE)

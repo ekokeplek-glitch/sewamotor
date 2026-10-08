@@ -457,9 +457,9 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
   * `docs/OPERATOR_MANUAL.md`
   * `docs/ADMIN_GUIDE.md`
 * **Dependensi:** TASK-023, TASK-024.
-* **Kriteria Selesai:** Dokumen panduan tersedia dan mudah dipahami oleh staf non-teknis.
-* **Cara Pengujian:** Uji keterbacaan panduan bersama calon operator.
-* **Risiko:** SOP tidak dipatuhi operator jika terlalu rumit.
+* **Kriteria Selesai:** Dokumen panduan tersedia dan mudah dipahami oleh staf non-teknis (9 bagian SOP lapangan operator dan 8 modul panduan manajemen admin lengkap).
+* **Cara Pengujian:** Verifikasi kelengkapan materi SOP bersama alur operasional lapangan, cross-check dengan blueprint, data model, dan aturan bisnis terintegrasi.
+* **Risiko:** SOP tidak dipatuhi operator jika terlalu rumit (dimitigasi dengan format checklist, template WhatsApp siap salin, dan tabel troubleshooting darurat).
 
 ---
 

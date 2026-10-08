@@ -8,6 +8,27 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-08
 
 ### Added
+- **Fase 4 (TASK-029: Buat Dokumentasi Admin & SOP Operator / Operational SOP & Guides):**
+  - **Penyusunan Buku Panduan Operator & SOP Lapangan (`docs/OPERATOR_MANUAL.md`):**
+    - Penjelasan terperinci batasan wewenang role Operator: hak pengelolaan armada motor & booking sewa, larangan mutlak menghapus motor (`delete_motors`), larangan manipulasi kategori motor, serta proteksi 403 halaman pengaturan website.
+    - SOP 1: Standar respon cepat konfirmasi pesan WhatsApp pelanggan dengan SLA < 5 menit dan panduan membaca template pesan berkode booking unik `RYK-...`.
+    - SOP 2: Verifikasi ketat 3 dokumen persyaratan (e-KTP asli fisik wajib dititipkan, SIM C / paspor, dokumen pendukung 2), validasi akun media sosial aktif, kontak darurat keluarga independen, dan standar kepatuhan privasi data pelanggan (UU PDP No. 27/2022).
+    - SOP 3: Verifikasi rute perjalanan (Rute Standar Malang Kota & Wisata Batu vs Rute Ekstrem Bromo, Cangar, dan Pantai Selatan), larangan motor matik ke pasir Bromo demi keselamatan, kewajiban unit Trail Honda CRF 150L, dan kepatuhan batas wilayah Malang Raya.
+    - SOP 4: Alur status transaksi di WP-Admin (Menunggu Konfirmasi -> Dikonfirmasi -> Sewa Berjalan -> Selesai Sewa) dan validasi alokasi plat nomor fisik bebas konflik jadwal.
+    - SOP 5: Aturan sewa kelipatan 24 jam, toleransi keterlambatan 2 jam gratis (*grace period*), penagihan denda manual jika keterlambatan > 2 jam, dan prosedur perpanjangan sewa resmi (+24 jam).
+    - SOP 6: Prosedur serah terima unit di 2 pool resmi (Pool Dinoyo & Pool Batu) dan layanan antar-jemput stasiun/hotel dengan checklist fisik 4 sisi bodi motor dan fasilitas gratis (2 helm SNI, 2 jas hujan, phone holder).
+    - SOP 7: Prosedur pengembalian unit, pengecekan bodi/bensin, pengembalian e-KTP fisik, dan penutupan status pesanan.
+    - Bagian 9: Prosedur darurat lapangan (kunci hilang, ban bocor, kecelakaan ringan, mesin mogok, dan penyewa hilang kontak).
+  - **Penyusunan Panduan Administrator & Pengelola Sistem (`docs/ADMIN_GUIDE.md`):**
+    - Matriks Role-Based Access Control (RBAC) perbandingan Administrator vs Operator vs Tamu publik.
+    - Panduan konfigurasi nomor WhatsApp resmi perusahaan dan jam operasional pool (07:00 – 23:00 WIB).
+    - Panduan pengelolaan tarif dan eksekusi Penyesuaian Harga Massal (*Bulk Price Adjustment*) peak season dengan mekanisme keamanan *two-pass fail-safe rollback*.
+    - Manajemen katalog armada motor, inventaris kuota fisik tertutup (`_ryokou_physical_stock`), dan normalisasi daftar plat nomor kendaraan (`_ryokou_plate_numbers`).
+    - Panduan penggunaan Dashboard Operasional untuk memantau unit disewa hari ini, booking menunggu konfirmasi, dan sebaran unit aktif per pool.
+    - Prosedur pembatalan pesanan resmi oleh Admin (*Cancel Booking with Reason*) dan pelepasan kuota otomatis kembali ke pool.
+    - Prosedur pembuatan akun staf Operator baru dengan prinsip *Least Privilege* dan prosedur offboarding aman.
+    - Kepatuhan UU Perlindungan Data Pribadi (UU PDP No. 27/2022) pada data CPT `penyewaan` serta jadwal pencadangan rutin (*daily MySQL & weekly uploads backup*).
+
 - **Fase 4 (TASK-028: Buat Pengujian Manual dan Otomatis / QA Testing Matrix):**
   - **Matriks Pengujian QA (20 Skenario):**
     - Verifikasi penuh 20 skenario uji pada `TESTING.md` (TC-001 s/d TC-020) berstatus **PASSED** (100%).
