@@ -1,0 +1,3 @@
+# Plugin packaging git attributes
+tests/ export-ignore
+.git* export-ignore

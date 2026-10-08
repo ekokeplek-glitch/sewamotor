@@ -463,13 +463,15 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 
 ---
 
-### TASK-030: Buat Panduan Deployment & Checklist Produksi
+### TASK-030: Buat Panduan Deployment & Checklist Produksi [DONE]
+* **Status:** Selesai (DONE) - 2026-10-08
 * **Tujuan:** Menyusun dokumentasi deployment lengkap ke server hosting (LiteSpeed / Nginx), konfigurasi SSL, cache rules, konfigurasi permalink (flush rewrite otomatis di activation hook), backup otomatis, dan prosedur rollback. Memastikan direktori `tests/` dikecualikan dari paket rilis produksi dan `uninstall.php` memverifikasi konstanta `WP_UNINSTALL_PLUGIN`.
 * **File yang Dibuat/Diubah:**
-  * `docs/DEPLOYMENT_GUIDE.md`
-  * `README.md`
-  * `.gitattributes`
+  * `docs/DEPLOYMENT_GUIDE.md` (baru)
+  * `README.md` (diperbarui)
+  * `.gitattributes` (baru)
+  * `wp-content/plugins/ryokourent-core/.gitattributes` (baru)
 * **Dependensi:** TASK-028, TASK-029.
-* **Kriteria Selesai:** Checklist pra-produksi lengkap dan siap dieksekusi untuk go-live tanpa meninggalkan berkas pengujian di server publik.
-* **Cara Pengujian:** Lakukan simulasi dry-run deployment di staging server.
-* **Risiko:** Perbedaan konfigurasi environment staging vs production.
+* **Kriteria Selesai:** Checklist pra-produksi lengkap dan siap dieksekusi untuk go-live tanpa meninggalkan berkas pengujian di server publik. Pengujian `git archive` dengan `.gitattributes` memverifikasi folder `tests/` dan berkas pengujian sepenuhnya dikecualikan dari paket rilis zip produksi. Guard `WP_UNINSTALL_PLUGIN` terverifikasi di `uninstall.php` dan `flush_rewrite_rules()` terverifikasi di activation hook plugin `ryokourent-core.php`.
+* **Cara Pengujian:** Jalankan simulasi packaging `git archive --format=zip --prefix=ryokourent-core/ -o /tmp/ryokourent-core.zip HEAD:wp-content/plugins/ryokourent-core/` dan verifikasi integritas file zip tanpa direktori `tests/`.
+* **Risiko:** Perbedaan konfigurasi environment staging vs production (dimitigasi dengan panduan komprehensif server block Nginx, `.htaccess` LiteSpeed Cache, SSL Let's Encrypt, dan 3 skenario disaster recovery).

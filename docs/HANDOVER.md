@@ -13,9 +13,9 @@
 Anda bertindak sebagai engineer untuk proyek "Ryokourent": rental motor Malang & Batu, WordPress native, plugin `ryokourent-core` + child theme `generatepress-child`. Anda melanjutkan pekerjaan AI sebelumnya, jadi jangan berasumsi: baca dulu, baru bertindak.
 
 ## TARGET PEKERJAAN
-- Task: TASK-030: Buat Panduan Deployment & Checklist Produksi
-- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Utama (deployment & produksi)
-- Catatan khusus (opsional): -
+- Task: FINAL RELEASE & PR REVIEW (Semua 30 Task Selesai - Penggabungan Branch develop & main)
+- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Reviewer & Release Engineer
+- Catatan khusus (opsional): Seluruh implementasi FASE 0 s/d FASE 4 (TASK-001 s/d TASK-030) telah selesai 100%. Verifikasi PR dan persiapan tag rilis v1.0.0.
 
 ## URUTAN BACA (WAJIB, SEBELUM MENULIS KODE)
 1. `SESSION_STATE.md`: SUMBER KEBENARAN status (cabang aktif, task terakhir, task selanjutnya, riwayat). Jika dokumen lain bertentangan soal status, ikuti berkas ini.

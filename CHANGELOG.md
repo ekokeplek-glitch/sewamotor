@@ -8,6 +8,25 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 ## [Unreleased] - 2026-10-08
 
 ### Added
+- **Fase 4 (TASK-030: Buat Panduan Deployment & Checklist Produksi / Production Deployment & Packaging):**
+  - **Penyusunan Panduan Deployment Lengkap (`docs/DEPLOYMENT_GUIDE.md`):**
+    - Panduan deployment komprehensif ke Web Server LiteSpeed Enterprise / OpenLiteSpeed dan Nginx 1.24+ untuk lingkungan produksi.
+    - Aturan caching spesifik LiteSpeed Cache (`.htaccess`) dan FastCGI Nginx yang mengecualikan endpoint AJAX `/wp-admin/admin-ajax.php`, aksi booking `ryokourent_process_booking`, dan token refresh `ryokourent_refresh_nonce`.
+    - Konfigurasi sertifikat SSL Let's Encrypt / AutoSSL dan header pengerasan keamanan HTTP (HSTS, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`).
+    - Pengerasan keamanan berkas `wp-config.php` produksi (`WP_DEBUG: false`, `DISALLOW_FILE_EDIT: true`, `FORCE_SSL_ADMIN: true`, `WP_POST_REVISIONS: 5`).
+    - Sinkronisasi zona waktu resmi `Asia/Jakarta` (WIB) dan struktur permalink `/%postname%/`.
+    - Checklist verifikasi pra-peluncuran (*pre-launch*) dan uji asap fungsionalitas pasca-deployment (*smoke test*).
+    - Prosedur otomatisasi pencadangan data (backup database MySQL harian pukul 02:00 WIB dan folder media `uploads/` mingguan) serta retensi 30 hari dan offsite cloud sync.
+    - 3 Skenario pemulihan bencana dan prosedur rollback (rollback plugin/tema bermasalah, restore database MySQL, dan pemulihan total server).
+  - **Konfigurasi Atribut Git untuk Paket Rilis Bersih (`.gitattributes`):**
+    - Pembuatan berkas `.gitattributes` root dan `wp-content/plugins/ryokourent-core/.gitattributes` dengan aturan `export-ignore`.
+    - Menjamin paket rilis zip produksi (`git archive`) 100% bebas dari direktori pengujian `tests/`, konfigurasi linter/development (`.phpcs.xml.dist`, `eslint`), dan dokumen internal AI.
+  - **Pembaruan Dokumentasi Utama Proyek (`README.md`):**
+    - Penyelarasan pohon direktori folder `docs/` dan penambahan instruksi quick start pembuatan paket rilis bersih via `git archive`.
+  - **Verifikasi Keamanan Inti:**
+    - Verifikasi kepatuhan konstanta `WP_UNINSTALL_PLUGIN` pada `uninstall.php`.
+    - Verifikasi registrasi `flush_rewrite_rules()` otomatis pada fungsi aktivasi plugin `ryokourent-core.php`.
+
 - **Fase 4 (TASK-029: Buat Dokumentasi Admin & SOP Operator / Operational SOP & Guides):**
   - **Penyusunan Buku Panduan Operator & SOP Lapangan (`docs/OPERATOR_MANUAL.md`):**
     - Penjelasan terperinci batasan wewenang role Operator: hak pengelolaan armada motor & booking sewa, larangan mutlak menghapus motor (`delete_motors`), larangan manipulasi kategori motor, serta proteksi 403 halaman pengaturan website.

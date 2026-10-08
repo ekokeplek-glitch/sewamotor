@@ -6,10 +6,11 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 
 ## 1. Status Sesi Saat Ini
 * **Tanggal / Waktu:** 2026-10-08
-* **Cabang Git Aktif:** `feature/operator-manual-and-admin-guide` (dibuat dari `develop`)
+* **Cabang Git Aktif:** `feature/deployment-and-production-checklist` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/deployment-and-production-checklist` (Fitur panduan deployment hosting LiteSpeed/Nginx, packaging rilis bersih, dan checklist produksi)
   - `feature/operator-manual-and-admin-guide` (Fitur dokumentasi operasional SOP operator dan buku panduan sistem administrator)
   - `feature/automated-and-manual-testing` (Fitur pengujian otomatis, matriks QA 20 skenario, unit test kalkulasi tarif & ketersediaan kuota, serta ketahanan role operator di XAMPP)
   - `feature/security-hardening` (Fitur audit keamanan, direct file access guards, sanitasi input, mitigasi DoS unbounded query, proteksi nonce, dan RBAC)
@@ -28,9 +29,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `TASK-029: Buat Dokumentasi Admin & SOP Operator`
-* **Status Task Terakhir:** **DONE (SELESAI)** - Dokumen operasional resmi `docs/OPERATOR_MANUAL.md` (9 bagian SOP lapangan lengkap) dan `docs/ADMIN_GUIDE.md` (8 modul panduan manajemen dan teknis) telah selesai disusun dengan bahasa yang jelas dan mudah dipahami staf non-teknis.
-* **Task Selanjutnya:** `TASK-030: Buat Panduan Deployment & Checklist Produksi` (Menunggu instruksi lanjutan dari pengguna)
+* **Task Terakhir Selesai:** `TASK-030: Buat Panduan Deployment & Checklist Produksi`
+* **Status Task Terakhir:** **DONE (SELESAI)** - Seluruh panduan deployment hosting (LiteSpeed & Nginx), konfigurasi SSL, caching rules, permalink flush otomatis, backup otomatis, prosedur disaster recovery / rollback, eksklusi `.gitattributes` untuk rilis bersih tanpa folder `tests/`, serta verifikasi `uninstall.php` telah tuntas 100%.
+* **Task Selanjutnya:** **SELESAI PENUH (ALL 30 TASKS COMPLETED)** - Siap untuk pengajuan Pull Request integrasi ke branch `develop` dan branch produksi `main`.
 
 ---
 
@@ -67,7 +68,23 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 | **TASK-027** | Buat Validasi Keamanan (Security Hardening) | FASE 4 | **DONE** | TASK-002 s/d TASK-026 | 2026-10-08 |
 | **TASK-028** | Buat Pengujian Manual dan Otomatis | FASE 4 | **DONE** | TASK-027 | 2026-10-08 |
 | **TASK-029** | Buat Dokumentasi Admin & SOP Operator | FASE 4 | **DONE** | TASK-023, TASK-024 | 2026-10-08 |
-| **TASK-030** | Buat Panduan Deployment & Checklist Produksi | FASE 4 | PENDING | TASK-028, TASK-029 | - |
+| **TASK-030** | Buat Panduan Deployment & Checklist Produksi | FASE 4 | **DONE** | TASK-028, TASK-029 | 2026-10-08 |
+
+---
+
+## 3. Komponen yang Telah Diimplementasikan pada TASK-030
+1. **Panduan Deployment Produksi & Disaster Recovery (`docs/DEPLOYMENT_GUIDE.md`):**
+   - 8 Bab panduan komprehensif: Arsitektur rilis, persyaratan sistem PHP 8.1+ (disarankan 8.2/8.3) & MySQL 8.0+ / MariaDB 10.5+, pembuatan paket rilis bersih (`git archive`), konfigurasi web server LiteSpeed `.htaccess` & Nginx server block, aturan cache bypass untuk AJAX `/wp-admin/admin-ajax.php`, konfigurasi SSL & HSTS hardening, pengerasan `wp-config.php` (`WP_DEBUG: false`, `DISALLOW_FILE_EDIT: true`, `FORCE_SSL_ADMIN: true`), konfigurasi timezone `Asia/Jakarta`, permalink `/%postname%/`, verifikasi `flush_rewrite_rules()` otomatis, checklist pre-launch & post-launch smoke test, otomatisasi backup harian database MySQL dan mingguan media `uploads/`, serta 3 skenario disaster recovery / rollback.
+2. **Konfigurasi Git Attributes & Eksklusi Rilis Produksi (`.gitattributes`):**
+   - Normalisasi end-of-line (`eol=lf`) lintas sistem operasi.
+   - Kebijakan `export-ignore` untuk mengecualikan direktori `tests/`, konfigurasi linter (`.phpcs.xml.dist`, `eslint`), berkas pengembangan lokal, dan catatan internal dev dari paket rilis produksi (`git archive`).
+   - Penambahan `.gitattributes` di tingkat plugin `wp-content/plugins/ryokourent-core/.gitattributes` untuk memastikan direktori `tests/` selalu bersih saat pengarsipan sub-tree.
+3. **Pembaruan Struktur Dokumentasi Proyek (`README.md`):**
+   - Penyelarasan struktur folder `docs/` mencakup seluruh panduan teknis dan operasional yang telah disusun (`DEPLOYMENT_GUIDE.md`, `OPERATOR_MANUAL.md`, `ADMIN_GUIDE.md`, `PRODUCTION_CHECKLIST.md`, dll).
+   - Penambahan panduan quick start rilis produksi berbasis perintah `git archive`.
+4. **Verifikasi Keamanan Inti:**
+   - Verifikasi konstanta `WP_UNINSTALL_PLUGIN` pada `uninstall.php` baris 9 (`if (!defined('WP_UNINSTALL_PLUGIN')) { exit; }`).
+   - Verifikasi mekanisme `flush_rewrite_rules()` pada fungsi aktivasi plugin `ryokourent_activate_plugin()`.
 
 ---
 

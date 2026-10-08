@@ -41,13 +41,17 @@ Aplikasi dan sistem manajemen rental sepeda motor berbasis WordPress dengan pend
 │   │   └── ryokourent-core/   # Plugin logika bisnis, CPT, dan booking engine
 │   └── themes/
 │       └── generatepress-child/# Child theme GeneratePress untuk tampilan frontend
-└── docs/                      # Panduan instalasi, branching, dan checklist
-    ├── INSTALLATION_LOCAL.md
-    ├── INSTALLATION_HOSTING.md
-    ├── CODING_STANDARDS.md
-    ├── GIT_WORKFLOW.md
-    ├── PRE_MERGE_CHECKLIST.md
-    └── PRODUCTION_CHECKLIST.md
+├── docs/                      # Panduan operasional, deployment, dan arsitektur
+│   ├── DEPLOYMENT_GUIDE.md    # Panduan deployment produksi, LiteSpeed/Nginx, SSL & rollback
+│   ├── PRODUCTION_CHECKLIST.md# Checklist pra-peluncuran dan go-live
+│   ├── OPERATOR_MANUAL.md     # SOP lapangan staf operator (SLA, verifikasi e-KTP, Bromo)
+│   ├── ADMIN_GUIDE.md         # Buku panduan administrator (RBAC, bulk pricing, backup)
+│   ├── INSTALLATION_HOSTING.md# Panduan instalasi di cloud hosting / cPanel
+│   ├── INSTALLATION_LOCAL.md  # Panduan setup environment lokal XAMPP / Docker
+│   ├── GIT_WORKFLOW.md        # Alur kerja Git, branch strategy, dan Conventional Commits
+│   ├── CODING_STANDARDS.md    # Standar penulisan kode WordPress (WPCS)
+│   ├── PRE_MERGE_CHECKLIST.md # Checklist sebelum merge Pull Request
+│   └── HANDOVER.md            # Protokol handover antar AI pengembang
 ```
 
 ---
@@ -64,12 +68,16 @@ Aplikasi dan sistem manajemen rental sepeda motor berbasis WordPress dengan pend
 
 ---
 
-## 🚀 Panduan Memulai Cepat (Quick Start)
-1. Pasang WordPress versi $\ge 6.4$ dengan PHP $\ge 8.1$.
-2. Pasang tema induk **GeneratePress** di `wp-content/themes/generatepress/`.
-3. Pasang tema anak **generatepress-child** di `wp-content/themes/generatepress-child/` dan aktifkan.
-4. Salin plugin **ryokourent-core** ke `wp-content/plugins/ryokourent-core/` dan aktifkan.
-5. Buka dokumentasi teknis lengkap di folder `/docs/`.
+## 🚀 Panduan Memulai Cepat & Rilis Produksi
+1. **Lingkungan Server:** Pastikan server menggunakan PHP $\ge 8.1$ (direkomendasikan PHP 8.2 / 8.3) dengan ekstensi `mysqli`, `curl`, `json`, `mbstring`.
+2. **Packaging Rilis Bersih:** Buat arsip rilis produksi tanpa berkas pengujian menggunakan `.gitattributes`:
+   ```bash
+   git archive --format=zip --prefix=ryokourent-core/ -o ryokourent-core-v1.0.0.zip HEAD:wp-content/plugins/ryokourent-core/
+   git archive --format=zip --prefix=generatepress-child/ -o generatepress-child-v1.0.0.zip HEAD:wp-content/themes/generatepress-child/
+   ```
+3. **Pemasangan Tema:** Pasang tema induk **GeneratePress** di `wp-content/themes/generatepress/`, lalu unggah dan aktifkan **generatepress-child**.
+4. **Pemasangan Plugin:** Unggah paket plugin **ryokourent-core** ke `wp-content/plugins/` dan aktifkan via WP-Admin.
+5. **Panduan Deployment Lengkap:** Baca panduan menyeluruh di [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) dan checklist di [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
 
 ---
 
