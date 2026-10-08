@@ -104,7 +104,7 @@ function ryokourent_register_motor_meta_fields() {
         'single'            => true,
         'sanitize_callback' => 'ryokourent_sanitize_physical_stock',
         'auth_callback'     => function() {
-            return current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
+            return current_user_can('edit_motors') || current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
         },
         'show_in_rest'      => false,
     ));
@@ -116,7 +116,7 @@ function ryokourent_register_motor_meta_fields() {
         'single'            => true,
         'sanitize_callback' => 'ryokourent_sanitize_plate_numbers_text',
         'auth_callback'     => function() {
-            return current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
+            return current_user_can('edit_motors') || current_user_can('manage_ryokourent_settings') || current_user_can('manage_options');
         },
         'show_in_rest'      => false,
     ));

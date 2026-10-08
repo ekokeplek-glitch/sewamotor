@@ -94,7 +94,7 @@ function ryokourent_count_overlapping_bookings($motor_id, $start_datetime, $end_
     $query_args = array(
         'post_type'      => 'penyewaan',
         'post_status'    => !empty($statuses) ? $statuses : array('status_dikonfirmasi', 'status_berjalan'),
-        'posts_per_page' => -1,
+        'posts_per_page' => 500, // Capped query limit per reviewOP M12 to avoid unbounded DoS
         'fields'         => 'ids',
         'no_found_rows'  => true,
         'meta_query'     => array(

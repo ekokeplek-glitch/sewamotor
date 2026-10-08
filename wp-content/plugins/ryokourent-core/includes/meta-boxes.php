@@ -726,7 +726,7 @@ function ryokourent_save_booking_meta_data($post_id) {
 
         // Plate allocation validation (reviewOP M6)
         if (!empty($clean_plate) && function_exists('ryokourent_validate_allocated_plate')) {
-            $check_motor_id = isset($_POST['_ryokou_rented_motor_id']) ? absint($_POST['_ryokou_rented_motor_id']) : (int) get_post_meta($post_id, '_ryokou_rented_motor_id', true);
+            $check_motor_id = isset($_POST['_ryokou_rented_motor_id']) ? absint(wp_unslash($_POST['_ryokou_rented_motor_id'])) : (int) get_post_meta($post_id, '_ryokou_rented_motor_id', true);
             $check_start    = isset($_POST['_ryokou_start_datetime']) ? sanitize_text_field(wp_unslash($_POST['_ryokou_start_datetime'])) : (string) get_post_meta($post_id, '_ryokou_start_datetime', true);
             $check_end      = isset($_POST['_ryokou_end_datetime']) ? sanitize_text_field(wp_unslash($_POST['_ryokou_end_datetime'])) : (string) get_post_meta($post_id, '_ryokou_end_datetime', true);
 

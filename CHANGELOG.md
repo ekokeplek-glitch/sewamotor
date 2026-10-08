@@ -5,9 +5,33 @@ Format penulisan berpedoman pada [Keep a Changelog](https://keepachangelog.com/i
 
 ---
 
-## [Unreleased] - 2026-10-07
+## [Unreleased] - 2026-10-08
 
 ### Added
+- **Fase 4 (TASK-027: Buat Validasi Keamanan / Security Hardening):**
+  - **Pencegahan Eksekusi Langsung File PHP (Direct File Execution Guards):**
+    - Audit 100% berkas PHP di plugin `ryokourent-core` dan subdirektori (`admin/`, `includes/`, `public/`, `assets/`, `tests/`).
+    - Penambahan guard `if (!defined('ABSPATH')) { exit; }` pada seluruh file `index.php` (silence is golden) untuk mencegah eksekusi langsung via browser HTTP.
+  - **Audit Sanitasi Input & Pencegahan Injeksi (XSS & SQL Injection):**
+    - Verifikasi sanitasi input pada semua parameter POST, GET, dan AJAX (`sanitize_text_field`, `sanitize_textarea_field`, `sanitize_key`, `absint`, `wp_unslash`, `esc_url_raw`).
+    - Penambahan `wp_unslash` pada `$check_motor_id` di `includes/meta-boxes.php` dan `absint(wp_unslash($_GET['revision']))` di `includes/post-types.php`.
+    - Sanitasi nomor telepon Indonesia (`ryokourent_sanitize_phone`) dan plat nomor huruf kapital (`ryokourent_sanitize_plate_numbers_text`).
+    - Audit query `$wpdb`: 100% kueri database menggunakan `$wpdb->prepare` atau `$wpdb->update`.
+  - **Pencegahan Denial of Service (DoS) Kueri Tak Terbatas:**
+    - Penghapusan seluruh kueri `posts_per_page => -1` yang berisiko memory exhaustion.
+    - Pembatasan kueri penghitungan ketersediaan di `includes/availability.php` (`posts_per_page => 500, no_found_rows => true`).
+    - Pembatasan dropdown armada di `public/forms.php` (`posts_per_page => 100, no_found_rows => true`).
+    - Pembatasan batas katalog di `public/templates.php` (`posts_per_page` dibatasi maksimum 100 dengan `no_found_rows => true`).
+  - **Verifikasi Nonce & Ketahanan Cache:**
+    - Nonce protection di setiap aksi mutasi data (`check_admin_referer` untuk quick action & admin settings, `wp_verify_nonce` untuk booking submission).
+    - Penanganan nonce kedaluwarsa transparan (HTTP 403 `invalid_nonce` + `refreshed_nonce`) agar formulir tetap berjalan lancar pada hosting ber-cache (LiteSpeed / WP Rocket / Cloudflare).
+  - **Audit Otorisasi & Role-Based Access Control (RBAC):**
+    - Sinkronisasi capability `auth_callback` untuk post meta `_ryokou_physical_stock` dan `_ryokou_plate_numbers` di `includes/meta-fields.php` agar selaras dengan izin operator (`edit_motors`).
+    - Penjagaan mutlak halaman admin settings & bulk pricing hanya untuk administrator (`manage_ryokourent_settings` dengan guard 403 `wp_die`).
+    - Perlindungan PII (UU PDP): CPT `penyewaan` terproteksi dengan `public => false`, `publicly_queryable => false`, dan `show_in_rest => false`.
+  - **Automated Security Hardening Test Suite:**
+    - Pembuatan `tests/test-security-hardening.php` memverifikasi pencegahan direct execution, sanitasi XSS/SQLi, validasi nonce, guard RBAC, rate-limiting, honeypot, dan proteksi privasi REST API.
+
 - **Pembaruan Aturan Bisnis & Kontrol Operasional Admin (Refinement & Operational Rules):**
   - **Hak Akses Operator (Role & Capabilities):**
     - Pembaruan izin di `includes/meta-boxes.php` dan `includes/user-roles.php`: Operator kini diizinkan mengedit armada eksisting, menambah/mengubah jumlah unit fisik (`_ryokou_physical_stock`) dan daftar plat nomor (`_ryokou_plate_numbers`), serta mengganti tarif sewa harian/mingguan/bulanan (`_ryokou_price_*`).

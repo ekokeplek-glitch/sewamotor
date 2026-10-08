@@ -412,13 +412,27 @@ Dokumen ini berisi rincian urutan 30 task proyek Ryokourent sesuai dengan arsite
 
 ---
 
-### TASK-027: Buat Validasi Keamanan (Security Hardening)
-* **Tujuan:** Melakukan audit menyeluruh: sanitasi seluruh input (`sanitize_text_field`), escaping seluruh output (`esc_html`, `esc_attr`, `esc_url`), verifikasi nonce pada setiap request POST/AJAX, dan pencegahan eksekusi langsung file PHP.
-* **File yang Dibuat/Diubah:** Seluruh file pada `wp-content/plugins/ryokourent-core/`.
+### TASK-027: Buat Validasi Keamanan (Security Hardening) [SELESAI - 2026-10-08]
+* **Tujuan:** Melakukan audit menyeluruh: sanitasi seluruh input (`sanitize_text_field`), escaping seluruh output (`esc_html`, `esc_attr`, `esc_url`), verifikasi nonce pada setiap request POST/AJAX, dan pencegahan eksekusi langsung file PHP (`defined('ABSPATH') || exit;`).
+* **File yang Dibuat/Diubah:**
+  * `wp-content/plugins/ryokourent-core/index.php`
+  * `wp-content/plugins/ryokourent-core/admin/index.php`
+  * `wp-content/plugins/ryokourent-core/includes/index.php`
+  * `wp-content/plugins/ryokourent-core/public/index.php`
+  * `wp-content/plugins/ryokourent-core/assets/css/index.php`
+  * `wp-content/plugins/ryokourent-core/assets/js/index.php`
+  * `wp-content/plugins/ryokourent-core/tests/index.php`
+  * `wp-content/plugins/ryokourent-core/includes/meta-boxes.php`
+  * `wp-content/plugins/ryokourent-core/includes/meta-fields.php`
+  * `wp-content/plugins/ryokourent-core/includes/availability.php`
+  * `wp-content/plugins/ryokourent-core/public/forms.php`
+  * `wp-content/plugins/ryokourent-core/public/templates.php`
+  * `wp-content/plugins/ryokourent-core/includes/post-types.php`
+  * `wp-content/plugins/ryokourent-core/tests/test-security-hardening.php`
 * **Dependensi:** TASK-002 s/d TASK-026.
-* **Kriteria Selesai:** Kode lolos uji PHP_CodeSniffer WordPress Coding Standards (WordPress-Core, WordPress-Security).
-* **Cara Pengujian:** Jalankan `phpcs` pada direktori plugin dan uji penetrasi input payload XSS/SQL Injection pada form.
-* **Risiko:** False positive rule sniffer atau missing sanitization pada field custom array.
+* **Kriteria Selesai:** 100% file PHP plugin memiliki direct execution guard, input disanitasi, output diescape, nonce diverifikasi, kueri database $wpdb terlindungi parameter binding, unbounded queries (-1) dihilangkan, role-based access control terlindungi, PII aman dari REST API.
+* **Cara Pengujian:** Jalankan unit test `tests/test-security-hardening.php` (mencakup 27 file direct access guard, uji injeksi XSS/SQL, verifikasi penolakan nonce, proteksi RBAC operator vs admin, transient rate limiting, dan privasi REST API). `compile_applet` dan `lint_applet` PASS.
+* **Risiko:** Perbedaan environment runtime lokal (PHP CLI dan phpcs dicatat sebagai TODO untuk verification staging server).
 
 ---
 

@@ -36,7 +36,8 @@ function ryokourent_render_booking_form($args = array()) {
     $motors = get_posts(array(
         'post_type'      => 'motor',
         'post_status'    => 'publish',
-        'posts_per_page' => -1,
+        'posts_per_page' => 100,
+        'no_found_rows'  => true,
         'orderby'        => 'menu_order title',
         'order'          => 'ASC',
     ));

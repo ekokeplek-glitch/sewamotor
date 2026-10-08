@@ -13,8 +13,8 @@
 Anda bertindak sebagai engineer untuk proyek "Ryokourent": rental motor Malang & Batu, WordPress native, plugin `ryokourent-core` + child theme `generatepress-child`. Anda melanjutkan pekerjaan AI sebelumnya, jadi jangan berasumsi: baca dulu, baru bertindak.
 
 ## TARGET PEKERJAAN
-- Task: TASK-027: Buat Validasi Keamanan (Security Hardening)
-- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Utama (implementasi) dan AI Reviewer & Security Auditor (audit)
+- Task: TASK-028: Buat Pengujian Manual dan Otomatis
+- Peran Anda (lihat `AI_WORKFLOW.md` §1): AI Reviewer & Security Auditor (audit & pengujian) dan AI Utama
 - Catatan khusus (opsional): -
 
 ## URUTAN BACA (WAJIB, SEBELUM MENULIS KODE)

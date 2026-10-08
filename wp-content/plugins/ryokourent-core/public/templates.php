@@ -255,11 +255,17 @@ function ryokourent_render_catalog_grid($args = array()) {
     );
     $parsed_args = wp_parse_args($args, $defaults);
 
+    $limit = intval($parsed_args['limit']);
+    if ($limit <= 0 || $limit > 100) {
+        $limit = 100;
+    }
+
     // Query published motor units
     $query_args = array(
         'post_type'      => 'motor',
         'post_status'    => 'publish',
-        'posts_per_page' => intval($parsed_args['limit']),
+        'posts_per_page' => $limit,
+        'no_found_rows'  => true,
         'orderby'        => 'menu_order title',
         'order'          => 'ASC',
     );

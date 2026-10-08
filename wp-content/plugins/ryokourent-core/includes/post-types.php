@@ -244,7 +244,7 @@ function ryokourent_motor_updated_messages($messages) {
         5  => isset($_GET['revision']) ? sprintf(
             /* translators: %s: revision ID */
             __('Armada motor dikembalikan ke revisi dari %s.', 'ryokourent'),
-            wp_post_revision_title((int) $_GET['revision'], false)
+            wp_post_revision_title(absint(wp_unslash($_GET['revision'])), false)
         ) : false,
         6  => sprintf(
             /* translators: %s: URL to view motor */

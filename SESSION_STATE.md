@@ -5,11 +5,12 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 ---
 
 ## 1. Status Sesi Saat Ini
-* **Tanggal / Waktu:** 2026-10-07
-* **Cabang Git Aktif:** `feature/business-rules-and-admin-controls` (dibuat dari `develop`)
+* **Tanggal / Waktu:** 2026-10-08
+* **Cabang Git Aktif:** `feature/security-hardening` (dibuat dari `develop`)
 * **Daftar Cabang Proyek Terdaftar (sesuai `GIT_WORKFLOW.md`):**
   - `main` (Branch produksi resmi)
   - `develop` (Branch integrasi aktif)
+  - `feature/security-hardening` (Fitur audit keamanan, direct file access guards, sanitasi input, mitigasi DoS unbounded query, proteksi nonce, dan RBAC)
   - `feature/business-rules-and-admin-controls` (Pembaruan aturan hak akses operator, perpanjangan sewa +24 jam, cancel booking admin dengan alasan, denda overtime manual, dan rute ekstrem Trail Bromo/Cangar/Pantai)
   - `feature/mobile-responsive-optimization` (Fitur optimasi antarmuka seluler, floating mobile bar, dan ergonomi thumb zone)
   - `feature/faq-and-pool-locations` (Fitur halaman FAQ, 2 lokasi pool resmi, dan aturan Bromo CRF)
@@ -25,9 +26,9 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
   - `feature/pricing` (Fitur kalkulator tarif harian, mingguan, bulanan)
   - `feature/availability` (Fitur pencegahan double booking & pengecekan stok unit)
   - `feature/whatsapp` (Fitur generator draft pesan & URL WhatsApp)
-* **Task Terakhir Selesai:** `Pembaruan Aturan Bisnis & Kontrol Operasional Admin` (Kelanjutan TASK-026 menuju TASK-027)
-* **Status Task Terakhir:** **DONE (SELESAI)** - `tests/test-business-rules.php` 26/26 PASS.
-* **Task Selanjutnya:** `TASK-027: Buat Validasi Keamanan (Security Hardening)` (Menunggu aba-aba selanjutnya dari pengguna)
+* **Task Terakhir Selesai:** `TASK-027: Buat Validasi Keamanan (Security Hardening)`
+* **Status Task Terakhir:** **DONE (SELESAI)** - Seluruh 27 berkas PHP ber-guard direct access, sanitasi XSS/SQLi ketat, unbounded query tereliminasi, `compile_applet` & `lint_applet` PASS.
+* **Task Selanjutnya:** `TASK-028: Buat Pengujian Manual dan Otomatis` (Menunggu instruksi lanjutan dari pengguna)
 
 ---
 
@@ -61,7 +62,34 @@ Dokumen ini melacak status pengerjaan sesi, task aktif, dependensi yang telah te
 | **TASK-024** | Buat Pengaturan Harga dan Nomor WhatsApp (Admin Settings) | FASE 3 | **DONE** | TASK-014, TASK-021 | 2026-10-07 |
 | **TASK-025** | Buat Halaman FAQ dan Lokasi Pool | FASE 4 | **DONE** | TASK-007, TASK-024 | 2026-10-07 |
 | **TASK-026** | Buat Responsive Design & Mobile-First Optimization | FASE 4 | **DONE** | TASK-011, TASK-025 | 2026-10-07 |
-| **TASK-027** | Buat Validasi Keamanan (Security Hardening) | FASE 4 | PENDING | TASK-002 s/d TASK-026 | - |
+| **TASK-027** | Buat Validasi Keamanan (Security Hardening) | FASE 4 | **DONE** | TASK-002 s/d TASK-026 | 2026-10-08 |
+| **TASK-028** | Buat Pengujian Manual dan Otomatis | FASE 4 | PENDING | TASK-027 | - |
+
+---
+
+## 3. Komponen yang Telah Diimplementasikan pada TASK-027
+1. **Direct File Execution Guards (`defined('ABSPATH') || exit;`):**
+   - Audit 100% berkas PHP di plugin `ryokourent-core` dan subdirektori (`admin/`, `includes/`, `public/`, `assets/`, `tests/`).
+   - Penambahan guard `if (!defined('ABSPATH')) { exit; }` pada seluruh file `index.php` (silence is golden) untuk mencegah eksekusi langsung via browser HTTP.
+2. **Audit Sanitasi Input & Pencegahan Injeksi (XSS & SQL Injection):**
+   - Verifikasi sanitasi input pada semua parameter POST, GET, dan AJAX (`sanitize_text_field`, `sanitize_textarea_field`, `sanitize_key`, `absint`, `wp_unslash`, `esc_url_raw`).
+   - Penambahan `wp_unslash` pada `$check_motor_id` di `includes/meta-boxes.php` dan `absint(wp_unslash($_GET['revision']))` di `includes/post-types.php`.
+   - Sanitasi nomor telepon Indonesia (`ryokourent_sanitize_phone`) dan plat nomor huruf kapital (`ryokourent_sanitize_plate_numbers_text`).
+   - Audit query `$wpdb`: 100% kueri database menggunakan `$wpdb->prepare` atau `$wpdb->update`.
+3. **Pencegahan Denial of Service (DoS) Kueri Tak Terbatas:**
+   - Penghapusan seluruh kueri `posts_per_page => -1` yang berisiko memory exhaustion.
+   - Pembatasan kueri penghitungan ketersediaan di `includes/availability.php` (`posts_per_page => 500, no_found_rows => true`).
+   - Pembatasan dropdown armada di `public/forms.php` (`posts_per_page => 100, no_found_rows => true`).
+   - Pembatasan batas katalog di `public/templates.php` (`posts_per_page` dibatasi maksimum 100 dengan `no_found_rows => true`).
+4. **Verifikasi Nonce & Ketahanan Cache:**
+   - Nonce protection di setiap aksi mutasi data (`check_admin_referer` untuk quick action & admin settings, `wp_verify_nonce` untuk booking submission).
+   - Penanganan nonce kedaluwarsa transparan (HTTP 403 `invalid_nonce` + `refreshed_nonce`) agar formulir tetap berjalan lancar pada hosting ber-cache (LiteSpeed / WP Rocket / Cloudflare).
+5. **Audit Otorisasi & Role-Based Access Control (RBAC):**
+   - Sinkronisasi capability `auth_callback` untuk post meta `_ryokou_physical_stock` dan `_ryokou_plate_numbers` di `includes/meta-fields.php` agar selaras dengan izin operator (`edit_motors`).
+   - Penjagaan mutlak halaman admin settings & bulk pricing hanya untuk administrator (`manage_ryokourent_settings` dengan guard 403 `wp_die`).
+   - Perlindungan PII (UU PDP): CPT `penyewaan` terproteksi dengan `public => false`, `publicly_queryable => false`, dan `show_in_rest => false`.
+6. **Automated Security Hardening Test Suite:**
+   - Berkas pengujian `tests/test-security-hardening.php` memverifikasi pencegahan direct execution, sanitasi XSS/SQLi, validasi nonce, guard RBAC, rate-limiting, honeypot, dan proteksi privasi REST API.
 
 ---
 
