@@ -63,10 +63,10 @@ tests/** export-ignore
 /wp-content/plugins/ryokourent-core/.git* export-ignore
 
 # Internal AI Development Prompts & Handover Files
-/AI_RULES.md export-ignore
-/AI_WORKFLOW.md export-ignore
-/SESSION_STATE.md export-ignore
-/REVIEW-ARCHITECTURE.md export-ignore
-/docs/REVIEW-ARCHITECTURE.md export-ignore
-/docs/HANDOVER.md export-ignore
-/docs/PRE_MERGE_CHECKLIST.md export-ignore
+#/AI_RULES.md export-ignore
+#/AI_WORKFLOW.md export-ignore
+#/SESSION_STATE.md export-ignore
+#/REVIEW-ARCHITECTURE.md export-ignore
+#/docs/REVIEW-ARCHITECTURE.md export-ignore
+#/docs/HANDOVER.md export-ignore
+#/docs/PRE_MERGE_CHECKLIST.md export-ignore
