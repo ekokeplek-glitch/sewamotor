@@ -37,6 +37,7 @@ wp-content/
 │       ├── ryokourent-core.php          # Main plugin file, bootstrap, konstanta, activation hooks
 │       ├── uninstall.php                # Cleanup jika plugin dihapus
 │       ├── readme.txt                   # Metadata plugin WordPress
+│       ├── .gitattributes               # Aturan export-ignore paket rilis produksi
 │       ├── includes/
 │       │   ├── helpers.php              # Sanitasi input, format rupiah, timezone WIB helpers
 │       │   ├── post-types.php           # Registrasi CPT motor & CPT penyewaan
@@ -73,12 +74,13 @@ wp-content/
 │
 └── themes/
     └── generatepress-child/
-        ├── style.css                    # CSS overrides GeneratePress
-        ├── functions.php                # Enqueue asset child theme
-        ├── screenshot.png               # Tampilan preview tema
+        ├── style.css                    # CSS overrides & konfigurasi child theme
+        ├── functions.php                # Enqueue asset child theme & hooks
+        ├── single-motor.php             # Template detail unit motor
+        ├── template-faq-pool.php        # Template halaman FAQ & 2 pool resmi
         └── templates/
-            ├── page-booking.php         # Template khusus halaman booking
-            └── single-motor.php         # Template detail unit motor
+            ├── single-motor.php         # Template part detail motor
+            └── template-faq-pool.php    # Template part FAQ & lokasi pool
 ```
 
 ## 4. Alur Data Booking (End-to-End Workflow)
